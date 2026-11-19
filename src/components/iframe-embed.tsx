@@ -18,13 +18,13 @@ export function IframeEmbed({
   return (
     <div
       className={cn(
-        "relative overflow-hidden rounded-lg border-2 border-border shadow-brutal",
+        "relative overflow-hidden rounded-lg border border-border shadow-brutal",
         aspectClassName
       )}
     >
       {!loaded && (
         <div className="absolute inset-0 flex items-center justify-center bg-card">
-          <div className="size-8 animate-spin rounded-full border-4 border-border border-t-transparent" />
+          <div className="size-8 animate-spin rounded-full border border-border border-t-transparent" />
         </div>
       )}
       <iframe

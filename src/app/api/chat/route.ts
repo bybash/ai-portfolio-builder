@@ -1,16 +1,16 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 
-import { features } from "@/lib/config";
 import { answerChatQuestion } from "@/lib/rag";
 import { aiRequestAllowed, featureOff, readJson, tooManyRequests } from "@/lib/rate-limit";
+import { getFeatures } from "@/lib/site-settings";
 
 const bodySchema = z.object({
   message: z.string().trim().min(1).max(2000),
 });
 
 export async function POST(request: Request) {
-  if (!features.chat) return featureOff();
+  if (!(await getFeatures()).chat) return featureOff();
   if (!aiRequestAllowed(request)) return tooManyRequests();
 
   const parsed = bodySchema.safeParse(await readJson(request));

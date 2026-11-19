@@ -18,6 +18,8 @@ export const imageBlockSchema = z.object({
 export const youtubeBlockSchema = z.object({
   videoId: z.string(),
   caption: z.string().optional(),
+  // "half": consecutive half-width videos sit side by side in two columns.
+  width: z.enum(["full", "half"]).default("full"),
 });
 
 export const diagramBlockSchema = z.object({

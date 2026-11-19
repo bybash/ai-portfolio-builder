@@ -1,3 +1,4 @@
+import { PageEyebrow } from "@/components/page-eyebrow";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { prisma } from "@/lib/prisma";
@@ -14,6 +15,8 @@ function periodLabel(startDate: Date, endDate: Date | null) {
 // written by the scripts or the admin shows up straight away.
 export const dynamic = "force-dynamic";
 
+export const metadata = { title: `Experience | ${siteConfig.person.name}` };
+
 export default async function ExperiencePage() {
   const experience = await prisma.experience.findMany({
     orderBy: [{ order: "asc" }, { id: "asc" }],
@@ -21,11 +24,12 @@ export default async function ExperiencePage() {
   });
 
   return (
-    <div className="flex flex-1 flex-col bg-background text-foreground">
+    <div className="flex flex-1 flex-col text-foreground">
       <SiteHeader active="experience" />
-      <div className="mx-auto flex w-full max-w-3xl flex-1 flex-col px-6">
+      <main className="mx-auto flex w-full max-w-3xl flex-1 flex-col px-6">
         <section className="py-12">
-          <h1 className="text-4xl font-black tracking-tight text-balance md:text-5xl">
+          <PageEyebrow word="When" />
+          <h1 className="text-4xl font-semibold tracking-tight text-balance md:text-5xl">
             Experience
           </h1>
           <p className="mt-3 max-w-md text-muted-foreground">
@@ -42,10 +46,10 @@ export default async function ExperiencePage() {
                 .map((b) => parseBlockData("paragraph", b.data).text);
 
               return (
-                <div key={role.id} className="relative pl-10">
-                  <span className="absolute top-1 left-0 size-4 rounded-full border-2 border-border bg-primary" />
+                <div key={role.id} data-reveal className="relative pl-10">
+                  <span className="absolute top-1 left-0 size-4 rounded-full border border-border bg-primary" />
                   <div className="flex flex-wrap items-baseline gap-x-2 gap-y-1">
-                    <h2 className="text-xl font-black">{role.title}</h2>
+                    <h2 className="text-xl font-semibold">{role.title}</h2>
                     <span className="text-muted-foreground">
                       at {role.company}
                     </span>
@@ -66,7 +70,7 @@ export default async function ExperiencePage() {
             })}
           </div>
         </section>
-      </div>
+      </main>
       <SiteFooter />
     </div>
   );

@@ -94,7 +94,7 @@ export function BlockEditor({
       />
 
       {blocks.length === 0 && (
-        <p className="rounded-lg border-2 border-dashed border-border p-6 text-center text-sm text-muted-foreground">
+        <p className="rounded-lg border border-dashed border-border p-6 text-center text-sm text-muted-foreground">
           No content blocks yet. Add one below.
         </p>
       )}
@@ -102,10 +102,10 @@ export function BlockEditor({
       {blocks.map((block, index) => (
         <div
           key={block.clientId}
-          className="rounded-lg border-2 border-border bg-card p-4 shadow-brutal-sm"
+          className="rounded-lg border border-border bg-card p-4 shadow-brutal-sm"
         >
           <div className="mb-3 flex items-center justify-between">
-            <span className="rounded-md border-2 border-border bg-secondary px-2 py-0.5 text-xs font-bold text-secondary-foreground uppercase">
+            <span className="rounded-md border border-border bg-secondary px-2 py-0.5 text-xs font-bold text-secondary-foreground uppercase">
               {block.type}
             </span>
             <div className="flex gap-1">
@@ -145,7 +145,7 @@ export function BlockEditor({
         </div>
       ))}
 
-      <div className="flex flex-wrap gap-2 border-t-2 border-dashed border-border pt-4">
+      <div className="flex flex-wrap gap-2 border-t border-dashed border-border pt-4">
         <span className="w-full text-xs font-bold text-muted-foreground uppercase">
           Add block
         </span>
@@ -190,7 +190,7 @@ function BlockFields({
         <div className="flex flex-col gap-1.5">
           <Label>Text</Label>
           <textarea
-            className="min-h-24 w-full rounded-lg border-2 border-border bg-card px-3 py-2 text-sm"
+            className="min-h-24 w-full rounded-lg border border-border bg-card px-3 py-2 text-sm"
             value={(d.text as string) ?? ""}
             onChange={(e) => onChange({ text: e.target.value })}
           />
@@ -258,7 +258,7 @@ function BlockFields({
           <div className="flex flex-col gap-1.5">
             <Label>Code</Label>
             <textarea
-              className="min-h-32 w-full rounded-lg border-2 border-border bg-card px-3 py-2 font-mono text-sm"
+              className="min-h-32 w-full rounded-lg border border-border bg-card px-3 py-2 font-mono text-sm"
               value={(d.code as string) ?? ""}
               onChange={(e) => onChange({ code: e.target.value })}
             />
@@ -286,7 +286,7 @@ function BlockFields({
             <select
               value={(d.aspectRatio as string) ?? "16:9"}
               onChange={(e) => onChange({ aspectRatio: e.target.value })}
-              className="w-full rounded-lg border-2 border-border bg-card px-3 py-2 text-sm"
+              className="w-full rounded-lg border border-border bg-card px-3 py-2 text-sm"
             >
               <option value="16:9">16:9 (video)</option>
               <option value="1:1">1:1 (square)</option>

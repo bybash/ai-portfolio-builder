@@ -91,7 +91,7 @@ export function ProjectList({ projects }: { projects: ProjectRow[] }) {
       {personalProjects.length > 0 && (
         <>
           <div className="mt-6 mb-1 flex items-center gap-3">
-            <span className="rounded-lg border-2 border-border bg-foreground px-3 py-1 text-xs font-black tracking-wide text-background uppercase">
+            <span className="rounded-lg border border-border bg-foreground px-3 py-1 text-xs font-semibold tracking-wide text-background uppercase">
               Personal projects
             </span>
             <span className="h-0.5 flex-1 bg-border" />
@@ -106,7 +106,7 @@ export function ProjectList({ projects }: { projects: ProjectRow[] }) {
       )}
 
       {optimisticProjects.length === 0 && (
-        <p className="rounded-lg border-2 border-dashed border-border p-8 text-center text-muted-foreground">
+        <p className="rounded-lg border border-dashed border-border p-8 text-center text-muted-foreground">
           No projects yet.
         </p>
       )}
@@ -133,7 +133,7 @@ function ProjectGroup({
           className="flex-col items-stretch gap-3 py-4 sm:flex-row sm:items-center sm:justify-between sm:gap-4"
         >
           <CardContent className="flex min-w-0 flex-wrap items-center gap-2 px-5 sm:gap-3">
-            <span className="font-black">{project.title}</span>
+            <span className="font-semibold">{project.title}</span>
             <span className="text-sm text-muted-foreground">/{project.slug}</span>
             {project.liveUrl && (
               <a
@@ -141,18 +141,18 @@ function ProjectGroup({
                 target="_blank"
                 rel="noopener noreferrer"
                 title={project.liveUrl}
-                className="flex size-6 items-center justify-center rounded-md border-2 border-border bg-card text-foreground"
+                className="flex size-6 items-center justify-center rounded-md border border-border bg-card text-foreground"
               >
                 <ExternalLink className="size-3" />
               </a>
             )}
             {yearLabelFor(project) && (
-              <span className="rounded-md border-2 border-border bg-card px-2 py-0.5 text-xs font-bold text-foreground">
+              <span className="rounded-md border border-border bg-card px-2 py-0.5 text-xs font-bold text-foreground">
                 {yearLabelFor(project)}
               </span>
             )}
             {project.featured && (
-              <span className="rounded-md border-2 border-border bg-accent px-2 py-0.5 text-xs font-bold text-accent-foreground">
+              <span className="rounded-md border border-border bg-accent px-2 py-0.5 text-xs font-bold text-accent-foreground">
                 Featured
               </span>
             )}

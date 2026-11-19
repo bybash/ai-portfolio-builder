@@ -66,7 +66,7 @@ function TagGroup({
           {tags.map((tag) => (
             <span
               key={tag.id}
-              className="flex items-center gap-2 rounded-lg border-2 border-border bg-card py-1.5 pr-1.5 pl-3 text-sm font-bold shadow-brutal-sm"
+              className="flex items-center gap-2 rounded-lg border border-border bg-card py-1.5 pr-1.5 pl-3 text-sm font-bold shadow-brutal-sm"
             >
               {tag.name}
               <Button

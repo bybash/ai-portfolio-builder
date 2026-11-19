@@ -13,7 +13,7 @@ export default function AdminImportPage() {
   return (
     <div className="min-w-0">
       <div className="mb-6">
-        <h1 className="text-3xl font-black">Import</h1>
+        <h1 className="text-3xl font-semibold">Import</h1>
         <p className="mt-1 max-w-2xl text-muted-foreground">
           Draft your site from your LinkedIn profile, a CV and your GitHub profile. The draft is
           written by this site&apos;s own AI provider and key (one model call, your CV text is
@@ -21,7 +21,7 @@ export default function AdminImportPage() {
         </p>
       </div>
       {!hasKey && (
-        <p className="mb-6 rounded-lg border-2 border-border bg-destructive/10 p-3 text-sm font-bold text-destructive">
+        <p className="mb-6 rounded-lg border border-border bg-destructive/10 p-3 text-sm font-bold text-destructive">
           The import needs an AI key: add AI_API_KEY (and AI_BASE_URL and CHAT_MODEL for a
           provider other than OpenAI) to this deployment&apos;s environment variables and redeploy.
         </p>

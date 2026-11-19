@@ -62,7 +62,7 @@ export function ImportClient({ hasKey, current }: { hasKey: boolean; current: Cu
     <div className="flex min-w-0 flex-col gap-8">
       <form
         onSubmit={onSubmit}
-        className="flex min-w-0 flex-col gap-4 rounded-lg border-2 border-border bg-card p-4 shadow-brutal-sm"
+        className="flex min-w-0 flex-col gap-4 rounded-lg border border-border bg-card p-4 shadow-brutal-sm"
       >
         <div className="flex flex-col gap-1.5">
           <Label htmlFor="linkedin">LinkedIn profile URL</Label>
@@ -92,7 +92,7 @@ export function ImportClient({ hasKey, current }: { hasKey: boolean; current: Cu
         </div>
 
         {state.linkedinFailure && (
-          <div className="flex flex-col gap-3 rounded-lg border-2 border-border bg-secondary p-3 text-sm text-secondary-foreground">
+          <div className="flex flex-col gap-3 rounded-lg border border-border bg-secondary p-3 text-sm text-secondary-foreground">
             <p className="font-bold">{state.linkedinFailure}</p>
             <div className="flex flex-col gap-1.5">
               <Label htmlFor="linkedinPdf">LinkedIn PDF (from Save to PDF)</Label>
@@ -108,7 +108,7 @@ export function ImportClient({ hasKey, current }: { hasKey: boolean; current: Cu
           {pending && <p className="text-sm text-muted-foreground">This takes up to a minute.</p>}
         </div>
         {state.error && (
-          <p className="rounded-lg border-2 border-border bg-destructive/10 p-3 text-sm font-bold break-words text-destructive">
+          <p className="rounded-lg border border-border bg-destructive/10 p-3 text-sm font-bold break-words text-destructive">
             {state.error}
           </p>
         )}
@@ -169,9 +169,9 @@ function Section({
   children: React.ReactNode;
 }) {
   return (
-    <section className="flex min-w-0 flex-col gap-4 rounded-lg border-2 border-border bg-card p-4 shadow-brutal-sm">
+    <section className="flex min-w-0 flex-col gap-4 rounded-lg border border-border bg-card p-4 shadow-brutal-sm">
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <h2 className="text-xl font-black">{title}</h2>
+        <h2 className="text-xl font-semibold">{title}</h2>
         {onCheck && (
           <label className="flex items-center gap-2 text-sm font-bold">
             <input
@@ -243,14 +243,14 @@ function Review({
   return (
     <div className="flex min-w-0 flex-col gap-6">
       <div>
-        <h2 className="text-2xl font-black">Review the draft</h2>
+        <h2 className="text-2xl font-semibold">Review the draft</h2>
         <p className="mt-1 text-sm text-muted-foreground">
           Check every value: the draft only uses facts from your sources, but it can still get
           things wrong. Untick anything you do not want.
           {fromFixture && " (Development: this draft came from PROFILE_IMPORT_FIXTURE, not from the AI provider.)"}
         </p>
         {dropped.length > 0 && (
-          <div className="mt-3 rounded-lg border-2 border-border bg-secondary p-3 text-sm text-secondary-foreground">
+          <div className="mt-3 rounded-lg border border-border bg-secondary p-3 text-sm text-secondary-foreground">
             <p className="font-bold">Left out because it is not in your sources:</p>
             <ul className="mt-1 list-disc pl-5">
               {dropped.map((d) => (
@@ -304,7 +304,7 @@ function Review({
               {copied ? "Copied" : "Copy snippet"}
             </Button>
           </div>
-          <pre className="max-h-80 max-w-full overflow-auto rounded-lg border-2 border-border bg-background p-3 text-xs">
+          <pre className="max-h-80 max-w-full overflow-auto rounded-lg border border-border bg-background p-3 text-xs">
             {snippet}
           </pre>
         </div>
@@ -346,7 +346,7 @@ function Review({
 
       <Section title={`FAQs (${faqs.length})`} checked={pick.faqs} onCheck={(v) => setPick({ ...pick, faqs: v })}>
         {draft.faqs.map((f, i) => (
-          <div key={i} className="flex min-w-0 flex-col gap-2 border-b-2 border-border pb-3 last:border-b-0 last:pb-0">
+          <div key={i} className="flex min-w-0 flex-col gap-2 border-b border-border pb-3 last:border-b-0 last:pb-0">
             <Field label="Question" value={f.question} onChange={(v) => set((d) => void (d.faqs[i].question = v))} />
             <Field label="Answer" value={f.answer} onChange={(v) => set((d) => void (d.faqs[i].answer = v))} multiline />
           </div>
@@ -356,7 +356,7 @@ function Review({
       <Section title={`Projects (${projects.length})`} note="Projects are saved without images; add a cover and screenshots in Projects afterwards.">
         {draft.projects.map((p, i) =>
           p.slug ? (
-            <div key={p.slug} className="flex min-w-0 flex-col gap-2 border-b-2 border-border pb-3 last:border-b-0 last:pb-0">
+            <div key={p.slug} className="flex min-w-0 flex-col gap-2 border-b border-border pb-3 last:border-b-0 last:pb-0">
               <label className="flex items-center gap-2 text-sm font-bold">
                 <input
                   type="checkbox"
@@ -381,7 +381,7 @@ function Review({
         )}
       </Section>
 
-      <div className="flex min-w-0 flex-col gap-3 rounded-lg border-2 border-border bg-card p-4 shadow-brutal-sm">
+      <div className="flex min-w-0 flex-col gap-3 rounded-lg border border-border bg-card p-4 shadow-brutal-sm">
         <label className="flex items-start gap-2 text-sm font-bold">
           <input
             type="checkbox"

@@ -63,7 +63,7 @@ export function ExperienceList({ experiences }: { experiences: ExperienceRow[] }
 
   if (optimisticExperiences.length === 0) {
     return (
-      <p className="rounded-lg border-2 border-dashed border-border p-8 text-center text-muted-foreground">
+      <p className="rounded-lg border border-dashed border-border p-8 text-center text-muted-foreground">
         No experience entries yet.
       </p>
     );
@@ -74,9 +74,9 @@ export function ExperienceList({ experiences }: { experiences: ExperienceRow[] }
       {optimisticExperiences.map((exp, index) => (
         <Card key={exp.id} className="flex-col items-stretch gap-3 py-4 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
           <CardContent className="flex min-w-0 flex-wrap items-center gap-2 px-5 sm:gap-3">
-            <span className="font-black">{exp.title}</span>
+            <span className="font-semibold">{exp.title}</span>
             <span className="text-sm text-muted-foreground">at {exp.company}</span>
-            <span className="rounded-md border-2 border-border bg-card px-2 py-0.5 font-mono text-xs font-bold">
+            <span className="rounded-md border border-border bg-card px-2 py-0.5 font-mono text-xs font-bold">
               {periodLabel(exp)}
             </span>
           </CardContent>

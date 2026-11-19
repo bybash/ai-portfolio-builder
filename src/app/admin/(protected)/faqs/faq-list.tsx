@@ -51,7 +51,7 @@ function FaqRow({ faq, isFirst, isLast }: { faq: FaqRow; isFirst: boolean; isLas
     return (
       <form
         action={handleSave}
-        className="flex flex-col gap-3 rounded-lg border-2 border-border bg-card p-4 shadow-brutal-sm"
+        className="flex flex-col gap-3 rounded-lg border border-border bg-card p-4 shadow-brutal-sm"
       >
         <div className="flex flex-col gap-1.5">
           <Label htmlFor={`question-${faq.id}`}>Question</Label>
@@ -94,7 +94,7 @@ function FaqRow({ faq, isFirst, isLast }: { faq: FaqRow; isFirst: boolean; isLas
   }
 
   return (
-    <div className="flex items-start gap-4 rounded-lg border-2 border-border bg-card p-4 shadow-brutal-sm">
+    <div className="flex items-start gap-4 rounded-lg border border-border bg-card p-4 shadow-brutal-sm">
       <div className="flex flex-col gap-1 pt-1">
         <button
           type="button"

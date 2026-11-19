@@ -261,6 +261,56 @@ export const themes = {
     accentForeground: "#ffffff",
     accents: ["#2b2b2b", "#dcdcd8", "#6e6e6e", "#a3a3a0", "#c4c4c0"],
   },
+  // Clay (warm neutral): white background, warm greys and a clay accent
+  clay: {
+    background: "#ffffff",
+    foreground: "#141413",
+    card: "#ffffff",
+    muted: "#f5f4ed",
+    mutedForeground: "#5e5d59",
+    primary: "#141413",
+    primaryForeground: "#ffffff",
+    secondary: "#f0eee6",
+    secondaryForeground: "#141413",
+    // Peach, a pale tint of clay; link underlines use deep clay (globals.css)
+    accent: "#f6e3da",
+    accentForeground: "#141413",
+    accents: ["#e3dacc", "#bcd1ca", "#cde2fb", "#ebcece", "#cbcadb"],
+  },
+  // Gradient (cool and bright): white background, deep navy text, and the
+  // blue, cyan, purple, magenta and gold of the gradient H logo
+  gradient: {
+    background: "#ffffff",
+    foreground: "#0b1433",
+    card: "#ffffff",
+    muted: "#f5f7fb",
+    mutedForeground: "#5b6478",
+    primary: "#2563eb",
+    primaryForeground: "#ffffff",
+    secondary: "#eef2ff",
+    secondaryForeground: "#0b1433",
+    // A pale blue tint; link underlines use purple (globals.css)
+    accent: "#e0ebff",
+    accentForeground: "#0b1433",
+    // Cyan, purple, magenta, gold, then blue. The logo gradient uses them in this order.
+    accents: ["#06b6d4", "#8b5cf6", "#f472b6", "#f59e0b", "#2563eb"],
+  },
+  // Gradient, dark: the deep navy behind the logo on the brand sheet, with a
+  // lighter blue so buttons and links stay readable
+  gradientDark: {
+    background: "#061225",
+    foreground: "#e8ecf5",
+    card: "#0b1a33",
+    muted: "#0f1f3c",
+    mutedForeground: "#9aa5bd",
+    primary: "#3b82f6",
+    primaryForeground: "#ffffff",
+    secondary: "#13254a",
+    secondaryForeground: "#e8ecf5",
+    accent: "#1c3366",
+    accentForeground: "#e8ecf5",
+    accents: ["#22d3ee", "#a78bfa", "#f472b6", "#fbbf24", "#3b82f6"],
+  },
 } satisfies Record<string, Theme>;
 
 export type ThemeName = keyof typeof themes;

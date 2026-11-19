@@ -1,5 +1,22 @@
 # AI Portfolio Builder
 
+> **This is a fork of [Mehmet Mutlu's AI Portfolio Builder](https://github.com/mutlumehmet/ai-portfolio-builder).** All the credit for the template goes to him: the portfolio, the admin, the AI layer, the profile import and the setup. This version keeps all of that and adds the changes below. The rest of this README is the original, with notes where this version differs.
+>
+> **What this version adds**
+>
+> * **A minimal look with dark mode.** Light borders, no hard shadows, serif headings, soft colour glows behind each page, and an optional `darkTheme` that follows the visitor's system setting, with a light and dark switch in the header. New themes: `gradient`, `gradientDark` and `clay`.
+> * **A pixel-art logo.** `person.logoPixel` draws a pixel mark from a few rows of `#` and a list of colours, extruded with an animation on load and on hover. The favicon, the app icons and the share image are generated from it.
+> * **A hero that streams like an AI chat.** A "Thinking…" status, the headline and intro word by word, an agent-style activity log with counting numbers, a "1 running" chip for the current role, and follow-up chips like suggested replies. The photo "prints" as the text grows, with no layout shift. The animation plays only on a full page load, and is skipped on back and forward and for reduced motion.
+> * **Section labels that answer like an agent**, with a thinking verb before each heading streams in.
+> * **FAQ as a chat.** Each question has a send button that streams the answer and a stop button that folds it away.
+> * **New pages and sections:** About (`/about`), How I work (`/how-i-work`), "Why the journey matters", systems and credentials, a stack order and hide list, and a terminal-style session block beside the logo.
+> * **Project header banners.** A project with `logo.svg` or `logo.png` (and an optional `logo-dark` variant) in its image folder opens with the logo on a soft gradient; others open with a cropped cover.
+> * **AI discovery.** `/llms.txt`, `/llms-full.txt` (the whole site as Markdown) and `/agents.md`, ProfilePage structured data, `robots.txt` and `sitemap.xml`.
+> * **Netlify support.** `netlify.toml`, CDN caching for public pages, and a fix for the HTML comment Netlify adds to `<head>`, which made React re-render the page.
+> * **Optional PostHog analytics**, off until `NEXT_PUBLIC_POSTHOG_KEY` is set, proxied through the site.
+> * **Settings in the admin.** `/admin/settings` edits the hero, the home sections, How I work, the stack, the About page, the pixel logo (a grid editor with a live preview), the session block, the footer and the feature flags. Saved values are stored in the database and override `site.config.ts`, which stays the default; each section can be reset to the file.
+> * **Accessibility:** a `<main>` landmark on every page.
+
 ![AI Portfolio Builder banner](docs/images/banner.png)
 
 **A complete portfolio website for developers and designers, plus an optional AI layer that answers questions about your work from your own content.**
@@ -33,7 +50,7 @@ All three can start from your LinkedIn profile, CV and GitHub: the draft is made
 
 **A. Deploy with Vercel, no code**
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fmutlumehmet%2Fai-portfolio-builder&project-name=my-portfolio&repository-name=my-portfolio&env=AI_API_KEY%2CADMIN_PASSWORD%2CSESSION_SECRET&envDescription=An%20AI%20API%20key%20%28works%20with%20OpenAI%20by%20default%3B%20for%20another%20provider%20set%20AI_BASE_URL%20and%20CHAT_MODEL%20after%20deploy%29%2C%20a%20password%20for%20%2Fadmin%2C%20and%20any%20long%20random%20string%20to%20sign%20the%20admin%20session.&envLink=https%3A%2F%2Fgithub.com%2Fmutlumehmet%2Fai-portfolio-builder%23environment-variables&stores=%5B%7B%22type%22%3A%22integration%22%2C%22protocol%22%3A%22storage%22%2C%22integrationSlug%22%3A%22neon%22%2C%22productSlug%22%3A%22neon%22%7D%5D)
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fbybash%2Fai-portfolio-builder&project-name=my-portfolio&repository-name=my-portfolio&env=AI_API_KEY%2CADMIN_PASSWORD%2CSESSION_SECRET&envDescription=An%20AI%20API%20key%20%28works%20with%20OpenAI%20by%20default%3B%20for%20another%20provider%20set%20AI_BASE_URL%20and%20CHAT_MODEL%20after%20deploy%29%2C%20a%20password%20for%20%2Fadmin%2C%20and%20any%20long%20random%20string%20to%20sign%20the%20admin%20session.&envLink=https%3A%2F%2Fgithub.com%2Fbybash%2Fai-portfolio-builder%23environment-variables&stores=%5B%7B%22type%22%3A%22integration%22%2C%22protocol%22%3A%22storage%22%2C%22integrationSlug%22%3A%22neon%22%2C%22productSlug%22%3A%22neon%22%7D%5D)
 
 Copies the repo to your GitHub, creates a free Neon database, asks for three values and deploys; the first build sets up the tables, sample content and search index. Then open `/admin/import` on your new site to draft your content from LinkedIn, a CV and GitHub. Details in [Deploy in one click](#deploy-in-one-click).
 
@@ -42,7 +59,7 @@ Copies the repo to your GitHub, creates a free Neon database, asks for three val
 **B. One command on your machine**
 
 ```bash
-git clone https://github.com/mutlumehmet/ai-portfolio-builder.git my-portfolio
+git clone https://github.com/bybash/ai-portfolio-builder.git my-portfolio
 cd my-portfolio && npm install && npm run setup
 ```
 
@@ -269,6 +286,10 @@ Open http://localhost:3000.
 3. Deploy. The first build prepares the database, as below.
 4. Before you share the link, follow the cost steps in [Cost and security](#cost-and-security).
 
+### Deploy to Netlify
+
+`netlify.toml` runs the same build as Vercel (`npm run vercel-build`). Add the same environment variables in Netlify; `NEXT_PUBLIC_SITE_URL` is only needed for a custom domain, otherwise Netlify's `URL` is used. Public pages are kept on Netlify's CDN for 5 minutes and refreshed in the background, so an edit in `/admin` could take up to 5 minutes to show; every admin save purges that cache when `NETLIFY_PURGE_API_TOKEN` and `SITE_ID` are set (see [Environment variables](#environment-variables)). PostHog events are proxied at Netlify's edge (see `netlify.toml`), because Next.js rewrites run in a function there and break the compressed event bodies.
+
 ### What happens on deploy
 
 Vercel runs `npm run vercel-build` (`scripts/vercel-build.ts`), which runs these steps before the normal build:
@@ -295,6 +316,9 @@ Without `DATABASE_URL` the steps are skipped and only the site is built. `npm ru
 | `NEXT_PUBLIC_SITE_URL` | No | Public URL; overrides `url` in `site.config.ts`. |
 | `FEATURE_*` | No | Feature flag overrides, see below. |
 | `RATE_LIMIT_PER_MINUTE`, `RATE_LIMIT_PER_DAY` | No | Per-IP limits for the AI endpoints. |
+| `NEXT_PUBLIC_POSTHOG_KEY` | No | PostHog project API key (`phc_...`). Analytics stay off without it. Events go through `/ingest` on your own domain; `/admin` is never tracked and surveys are off. |
+| `NETLIFY_PURGE_API_TOKEN`, `SITE_ID` | No | When both are set, every admin save purges Netlify's CDN cache, so the edit shows at once instead of within 5 minutes. Netlify provides them to the site's functions; if saves do not show at once, set them yourself (a personal access token and the site's ID). |
+| `NEXT_PUBLIC_POSTHOG_REGION` | No | `eu` (default) or `us`, where your PostHog project lives. On Netlify, also change the `eu` hosts in `netlify.toml`. |
 | `GITHUB_TOKEN` | No | Used by the profile import for a higher GitHub rate limit. Without it, GitHub allows 60 requests an hour. |
 
 **About the embedding dimension:** the `Chunk.embedding` column is `vector(1536)`, the output size of `text-embedding-3-small`. If you switch to a model with a different size, change `vector(1536)` in `prisma/schema.prisma`, create a new migration, and run `npm run rag:ingest -- --full`.
@@ -330,7 +354,7 @@ Not every provider honours JSON mode, so the fit check and the profile import as
 2. **`content/`** holds the sample content. Replace `content/projects/*.json` (same shape as `scripts/example-project.json`), `content/experience.json` and `content/faqs.json`, then run `npm run db:seed` and `npm run rag:ingest`. The seed upserts by slug, so remove the sample projects in `/admin` or with `npm run project:delete -- <slug>`.
 3. **Images** go in `public/`. Project images live in `public/projects/<slug>/`; their sizes are measured at install and build time so covers of the right shape fill their card. Replace `public/avatar.svg` with your photo (and update `person.photo`).
 4. **CV:** replace `public/cv.pdf` with your own.
-5. **`/admin`** lets you edit all content in the browser once deployed. Every save updates the chat's search index in the background.
+5. **`/admin`** lets you edit all content in the browser once deployed. Every save updates the chat's search index in the background. In this version, **`/admin/settings`** also edits the hero, home sections, How I work, stack, About page, pixel logo, session block, footer and feature flags. Those values are stored in the database (the `SiteSettings` table) and override `site.config.ts`, which stays the default and the fallback when there is no database; "Reset to site.config.ts" removes a saved section. Your name, contact details, SEO text, chat persona, theme and the `admin` and `rateLimit` flags stay in `site.config.ts`. `FEATURE_*` env vars still win over the flags saved in the admin.
 6. **Projects from the command line or a coding agent:** `npm run project:upsert -- path/to/project.json` creates or updates one project from a JSON file (same shape as `scripts/example-project.json`), and `npm run project:delete -- <slug>` removes one. Both re-sync the chat's search index straight away, so an AI coding assistant can manage your projects for you.
 
 ### Import from LinkedIn, CV and GitHub
@@ -353,6 +377,8 @@ Where to run it:
 
 ### Why neo-brutalism
 
+*This version switches the hard shadows off for a minimal look (`--shadow-brutal` in `src/app/globals.css`); set them back there to return to the original style. The screenshots in this README show the original.*
+
 Most developer portfolios look the same: a dark hero, a gradient, a grid of cards, the look of a software services company. After a while nobody remembers any of them. Neo-brutalism (thick outlines, hard shadows, flat bold colours) still stands out wherever it is used, and it is easy to read, so it makes a portfolio that people notice and that still looks good. That is why this template uses it.
 
 If you want a different look, you are not locked in. Open the project with your coding agent, give it screenshots or a design you like, and ask it to restyle the site. The colours live in `themes.ts`, the structure in `src/app/globals.css` and the components, so an agent can change either.
@@ -361,7 +387,7 @@ If you want a different look, you are not locked in. Open the project with your 
 
 ![Ready-made colour themes, each shown as a small card with a headline, buttons and its palette](docs/images/themes.png)
 
-Pick a theme in `site.config.ts` with one line, for example `theme: themes.slate`. Coral is the default. The themes live in `themes.ts`. To change single colours, spread a theme and override what you need: `theme: { ...themes.coral, primary: "#b83a22" }`. Every button colour in the ready-made themes passes WCAG AA contrast (text stays readable on it). Links and highlighted words use a deeper shade of your primary colour, worked out at build time, so they stay readable even with light or pastel colours and your own custom values.
+Pick a theme in `site.config.ts` with one line, for example `theme: themes.slate`. Gradient is the default in this version (coral in the original), with `gradientDark` as `darkTheme`. The themes live in `themes.ts`. To change single colours, spread a theme and override what you need: `theme: { ...themes.coral, primary: "#b83a22" }`. Every button colour in the ready-made themes passes WCAG AA contrast (text stays readable on it). Links and highlighted words use a deeper shade of your primary colour, worked out at build time, so they stay readable even with light or pastel colours and your own custom values.
 
 ## Feature flags
 
@@ -436,7 +462,8 @@ docker-compose.yml    local Postgres with pgvector
 * [neobrutalism.dev](https://www.neobrutalism.dev) ([neobrutalism-components](https://github.com/ekmas/neobrutalism-components), MIT, by Samuel Breznjak) for the neo-brutalist border, shadow and radius structure.
 * Several themes are adapted from the [neobrutalism palettes collected on colorany.com](https://colorany.com/color-palettes/neobrutalism-color-palettes/).
 * [Simple Icons](https://simpleicons.org) for the GitHub mark (CC0).
-* DM Sans and Geist Mono fonts (SIL Open Font License), via `next/font`.
+* Inter, Playfair Display and Geist Mono fonts (SIL Open Font License), via `next/font`; Inter and Playfair Display are also bundled in `src/app/og-fonts/` for the share image.
+* [Anime.js](https://animejs.com) for the motion (MIT).
 * Built on Next.js, React, Prisma, pgvector, Tailwind CSS, OpenAI, mcp-handler, unpdf and mammoth.
 
 ## Licence
@@ -448,6 +475,8 @@ Free and open source.
 Code: [MIT](LICENSE). Sample content (everything in `content/`, the sample CV, avatar and project images in `public/`) is released under [CC0](https://creativecommons.org/publicdomain/zero/1.0/): use it freely while you test. The sample persona and every company and project in it are fictional; any resemblance to real people or businesses is a coincidence.
 
 ## About
+
+This fork is maintained by Hakan Baybaş. The template, and everything below, is by Mehmet Mutlu.
 
 [![Mehmet Mutlu: work that's shipped, at mehmetmutlu.dev](docs/images/site-banner.png)](https://www.mehmetmutlu.dev)
 

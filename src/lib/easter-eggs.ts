@@ -1,4 +1,5 @@
-import { features, fillPlaceholders, siteConfig } from "@/lib/config";
+import { fillPlaceholders, siteConfig } from "@/lib/config";
+import { getFeatures } from "@/lib/site-settings";
 
 // Canned answers checked before the AI is called (site.config.ts `easterEggs`).
 // Off by default. Keep them harmless: the patterns are public in your repo.
@@ -7,8 +8,8 @@ const eggs = siteConfig.easterEggs.map((egg) => ({
   answer: egg.answer,
 }));
 
-export function checkEasterEgg(question: string): string | null {
-  if (!features.easterEggs) return null;
+export async function checkEasterEgg(question: string): Promise<string | null> {
+  if (!(await getFeatures()).easterEggs) return null;
   const hit = eggs.find((egg) => egg.pattern.test(question));
   return hit ? fillPlaceholders(hit.answer) : null;
 }

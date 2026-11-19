@@ -7,8 +7,8 @@ import { NextResponse } from "next/server";
 // that entirely.
 import { extractText, getDocumentProxy } from "unpdf";
 
-import { features } from "@/lib/config";
 import { aiRequestAllowed, featureOff, tooManyRequests } from "@/lib/rate-limit";
+import { getFeatures } from "@/lib/site-settings";
 
 export const runtime = "nodejs";
 
@@ -21,7 +21,7 @@ function textResponse(text: string) {
 }
 
 export async function POST(request: Request) {
-  if (!features.parseJd) return featureOff();
+  if (!(await getFeatures()).parseJd) return featureOff();
   if (!aiRequestAllowed(request)) return tooManyRequests();
 
   // Reject oversized uploads from the header before reading the body into memory.

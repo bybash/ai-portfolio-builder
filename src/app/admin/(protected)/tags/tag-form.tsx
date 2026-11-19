@@ -25,7 +25,7 @@ export function TagForm() {
     <form
       ref={formRef}
       action={formAction}
-      className="flex flex-wrap items-end gap-4 rounded-lg border-2 border-border bg-card p-4 shadow-brutal-sm"
+      className="flex flex-wrap items-end gap-4 rounded-lg border border-border bg-card p-4 shadow-brutal-sm"
     >
       <div className="flex flex-1 min-w-40 flex-col gap-1.5">
         <Label htmlFor="name">Tag name</Label>
@@ -38,7 +38,7 @@ export function TagForm() {
           id="kind"
           name="kind"
           defaultValue="technology"
-          className="h-10 rounded-lg border-2 border-border bg-card px-3 text-sm font-bold"
+          className="h-10 rounded-lg border border-border bg-card px-3 text-sm font-bold"
         >
           <option value="technology">Technology</option>
           <option value="industry">Industry</option>

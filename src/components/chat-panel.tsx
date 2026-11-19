@@ -123,7 +123,7 @@ export function ChatPanel() {
     <div>
       <div
         ref={scrollRef}
-        className="flex h-72 flex-col gap-3 overflow-y-auto rounded-lg border-2 border-border bg-background p-4"
+        className="flex h-72 flex-col gap-3 overflow-y-auto rounded-lg border border-border bg-background p-4"
       >
         {messages.length === 0 && (
           <div className="flex flex-col gap-2">
@@ -132,7 +132,7 @@ export function ChatPanel() {
                 key={s}
                 type="button"
                 onClick={() => send(s)}
-                className="rounded-lg border-2 border-border bg-card px-3 py-2 text-left text-sm font-bold shadow-brutal-sm"
+                className="rounded-lg border border-border bg-card px-3 py-2 text-left text-sm font-bold shadow-brutal-sm"
               >
                 {s}
               </button>
@@ -143,7 +143,7 @@ export function ChatPanel() {
         {messages.map((m, i) => (
           <div
             key={i}
-            className={`max-w-[85%] rounded-lg border-2 border-border px-3 py-2 text-sm ${
+            className={`max-w-[85%] rounded-lg border border-border px-3 py-2 text-sm ${
               m.role === "user"
                 ? "self-end bg-primary text-primary-foreground"
                 : "self-start bg-card"
@@ -153,7 +153,7 @@ export function ChatPanel() {
           </div>
         ))}
         {isPending && (
-          <div className="self-start rounded-lg border-2 border-border bg-card px-3 py-2 text-sm text-muted-foreground">
+          <div className="self-start rounded-lg border border-border bg-card px-3 py-2 text-sm text-muted-foreground">
             Thinking…
           </div>
         )}
@@ -173,7 +173,7 @@ export function ChatPanel() {
           onBlur={() => setIsFocused(false)}
           placeholder={placeholder}
           aria-label={STATIC_PLACEHOLDER}
-          className="h-10 flex-1 rounded-lg border-2 border-border bg-background px-3 text-sm placeholder:text-muted-foreground"
+          className="h-10 flex-1 rounded-lg border border-border bg-background px-3 text-sm placeholder:text-muted-foreground"
         />
         <Button type="submit" size="sm" disabled={isPending || !input.trim()}>
           <Send className="size-4" />

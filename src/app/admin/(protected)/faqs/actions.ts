@@ -1,9 +1,11 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { after } from "next/server";
 import { z } from "zod";
 
 import { requireAdmin } from "@/lib/auth";
+import { purgeCdn } from "@/lib/cdn";
 import { prisma } from "@/lib/prisma";
 import { syncRagIndexAfterResponse } from "@/lib/rag-sync-after";
 
@@ -20,6 +22,7 @@ function revalidateFaqPaths() {
   syncRagIndexAfterResponse();
   revalidatePath("/admin/faqs");
   revalidatePath("/");
+  after(purgeCdn);
 }
 
 export async function createFaq(

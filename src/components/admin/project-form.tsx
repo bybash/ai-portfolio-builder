@@ -73,7 +73,7 @@ export function ProjectForm({
           name="summary"
           required
           defaultValue={project?.summary}
-          className="min-h-20 w-full rounded-lg border-2 border-border bg-card px-3 py-2 text-sm"
+          className="min-h-20 w-full rounded-lg border border-border bg-card px-3 py-2 text-sm"
         />
       </div>
 
@@ -155,7 +155,7 @@ export function ProjectForm({
           id="category"
           name="category"
           defaultValue={project?.category ?? "commercial"}
-          className="w-full rounded-lg border-2 border-border bg-card px-3 py-2 text-sm"
+          className="w-full rounded-lg border border-border bg-card px-3 py-2 text-sm"
         >
           <option value="commercial">Commercial</option>
           <option value="personal">Personal</option>
@@ -193,7 +193,7 @@ export function ProjectForm({
       </div>
 
       {state.error && (
-        <p className="rounded-lg border-2 border-border bg-destructive/10 p-3 text-sm font-bold text-destructive">
+        <p className="rounded-lg border border-border bg-destructive/10 p-3 text-sm font-bold text-destructive">
           {state.error}
         </p>
       )}
@@ -211,7 +211,7 @@ function TagCheckbox({
   defaultChecked: boolean;
 }) {
   return (
-    <label className="flex cursor-pointer items-center gap-1.5 rounded-lg border-2 border-border bg-card px-2.5 py-1 text-sm font-bold shadow-brutal-sm has-[:checked]:bg-primary has-[:checked]:text-primary-foreground">
+    <label className="flex cursor-pointer items-center gap-1.5 rounded-lg border border-border bg-card px-2.5 py-1 text-sm font-bold shadow-brutal-sm has-[:checked]:bg-primary has-[:checked]:text-primary-foreground">
       <input
         type="checkbox"
         name="tagIds"

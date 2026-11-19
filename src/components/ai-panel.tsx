@@ -41,7 +41,7 @@ export function AiPanel({ chat, fitCheck, parseJd, mcp, cv, mcpUrl }: AiPanelPro
       <CardContent className="px-6">
         {tabs.length > 1 && (
           <div
-            className="mb-4 grid gap-1 rounded-lg border-2 border-border bg-secondary p-1"
+            className="mb-4 grid gap-1 rounded-lg border border-border bg-secondary p-1"
             style={{ gridTemplateColumns: `repeat(${tabs.length}, minmax(0, 1fr))` }}
           >
             {tabs.map((t) => (
@@ -52,8 +52,8 @@ export function AiPanel({ chat, fitCheck, parseJd, mcp, cv, mcpUrl }: AiPanelPro
                 aria-current={current.value === t.value}
                 className={`rounded-md px-3 py-2 text-center text-sm font-bold transition-colors ${
                   current.value === t.value
-                    ? "border-2 border-border bg-primary text-primary-foreground shadow-brutal-sm"
-                    : "border-2 border-transparent text-secondary-foreground/70 hover:text-secondary-foreground"
+                    ? "border border-border bg-primary text-primary-foreground shadow-brutal-sm"
+                    : "border border-transparent text-secondary-foreground/70 hover:text-secondary-foreground"
                 }`}
               >
                 {t.label}
@@ -61,7 +61,7 @@ export function AiPanel({ chat, fitCheck, parseJd, mcp, cv, mcpUrl }: AiPanelPro
             ))}
           </div>
         )}
-        {tabs.length === 1 && <h2 className="mb-2 text-2xl font-black">{current.label}</h2>}
+        {tabs.length === 1 && <h2 className="mb-2 text-2xl font-semibold">{current.label}</h2>}
         <p className="text-muted-foreground">{current.description}</p>
       </CardContent>
 

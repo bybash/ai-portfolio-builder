@@ -23,7 +23,7 @@ export default async function EditExperiencePage({
 
   return (
     <div>
-      <h1 className="mb-6 text-3xl font-black">Edit role</h1>
+      <h1 className="mb-6 text-3xl font-semibold">Edit role</h1>
       <ExperienceForm action={boundUpdate} experience={experience} />
     </div>
   );

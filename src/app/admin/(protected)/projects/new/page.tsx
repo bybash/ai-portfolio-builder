@@ -8,7 +8,7 @@ export default async function NewProjectPage() {
 
   return (
     <div>
-      <h1 className="mb-6 text-3xl font-black">New project</h1>
+      <h1 className="mb-6 text-3xl font-semibold">New project</h1>
       <ProjectForm action={createProject} allTags={allTags} />
     </div>
   );

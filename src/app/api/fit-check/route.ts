@@ -1,16 +1,16 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 
-import { features } from "@/lib/config";
 import { checkJobFit } from "@/lib/rag";
 import { aiRequestAllowed, featureOff, readJson, tooManyRequests } from "@/lib/rate-limit";
+import { getFeatures } from "@/lib/site-settings";
 
 const bodySchema = z.object({
   jobDescription: z.string().trim().min(20).max(8000),
 });
 
 export async function POST(request: Request) {
-  if (!features.fitCheck) return featureOff();
+  if (!(await getFeatures()).fitCheck) return featureOff();
   if (!aiRequestAllowed(request)) return tooManyRequests();
 
   const parsed = bodySchema.safeParse(await readJson(request));
