@@ -75,8 +75,11 @@ const themeCss = `:root{${themeVars(theme)}}` + (darkTheme ? `:root.dark{${theme
 const darkModeScript = `try{var t=localStorage.getItem("theme");if(t==="dark"||(t!=="light"&&matchMedia("(prefers-color-scheme: dark)").matches))document.documentElement.classList.add("dark")}catch(e){}`;
 
 // Turns page motion on before the first paint, unless the visitor asked for
-// reduced motion (see src/components/motion.tsx).
-const motionScript = `try{if(!matchMedia("(prefers-reduced-motion: reduce)").matches)document.documentElement.classList.add("motion")}catch(e){}`;
+// reduced motion (see src/components/motion.tsx). It also removes HTML
+// comments (and the stray text around them) from <head>: Netlify's free plan
+// inserts one there, and React would treat it as a hydration mismatch and
+// re-render the page from scratch, dropping the "dark" and "motion" classes.
+const motionScript = `try{for(var n=document.head.firstChild;n;){var x=n.nextSibling;if(n.nodeType===8||n.nodeType===3)n.remove();n=x}}catch(e){}try{if(!matchMedia("(prefers-reduced-motion: reduce)").matches)document.documentElement.classList.add("motion")}catch(e){}`;
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
