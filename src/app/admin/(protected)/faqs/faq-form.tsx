@@ -26,7 +26,7 @@ export function FaqForm() {
     <form
       ref={formRef}
       action={formAction}
-      className="flex flex-col gap-3 rounded-lg border-2 border-border bg-card p-4 shadow-brutal-sm"
+      className="flex flex-col gap-3 rounded-lg border border-border bg-card p-4 shadow-brutal-sm"
     >
       <div className="flex flex-col gap-1.5">
         <Label htmlFor="question">Question</Label>

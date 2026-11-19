@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
 import { GithubIcon } from "@/components/github-icon";
+import { ProjectHeaderImage } from "@/components/project-cover-image";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { BlockRenderer } from "@/components/block-renderer";
@@ -64,9 +65,10 @@ export default async function ProjectPage({
       : project.yearRange || project.year;
 
   return (
-    <div className="flex flex-1 flex-col bg-background text-foreground">
+    <div className="flex flex-1 flex-col text-foreground">
       <SiteHeader back={{ href: "/projects", label: "← All work" }} />
-      <div className="mx-auto flex w-full max-w-3xl flex-1 flex-col px-6">
+      <ProjectHeaderImage coverImageUrl={project.coverImageUrl} />
+      <main className="mx-auto flex w-full max-w-3xl flex-1 flex-col px-6">
         <article className="py-12">
           <div className="mb-3 flex flex-wrap items-center gap-2">
             {project.role && (
@@ -80,7 +82,7 @@ export default async function ProjectPage({
               </span>
             )}
           </div>
-          <h1 className="mb-5 text-4xl font-black tracking-tight text-balance md:text-5xl">
+          <h1 className="mb-5 text-4xl font-semibold tracking-tight text-balance md:text-5xl">
             {project.title}
           </h1>
           <div className="mb-6 flex flex-wrap gap-2">
@@ -124,16 +126,16 @@ export default async function ProjectPage({
               href={project.repoUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="mt-10 flex items-center gap-4 rounded-lg border-2 border-border bg-card p-5 shadow-brutal transition-transform hover:-translate-y-0.5"
+              className="mt-10 flex items-center gap-4 rounded-lg border border-border bg-card p-5 shadow-brutal transition-transform"
             >
-              <span className="flex size-12 shrink-0 items-center justify-center rounded-lg border-2 border-border bg-foreground text-background">
+              <span className="flex size-12 shrink-0 items-center justify-center rounded-lg border border-border bg-foreground text-background">
                 <GithubIcon className="size-7" />
               </span>
               <span className="flex min-w-0 flex-1 flex-col">
-                <span className="text-xs font-black tracking-widest text-muted-foreground uppercase">
+                <span className="text-xs font-semibold tracking-widest text-muted-foreground uppercase">
                   Open source on GitHub
                 </span>
-                <span className="text-lg font-black break-words">
+                <span className="text-lg font-semibold break-words">
                   {project.repoUrl
                     .replace(/^https:\/\/github\.com\//, "")
                     .replace(/\/tree\/[^/]+\//, "/")}
@@ -146,7 +148,7 @@ export default async function ProjectPage({
             </a>
           )}
         </article>
-      </div>
+      </main>
       <SiteFooter />
     </div>
   );

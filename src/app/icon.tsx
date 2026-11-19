@@ -1,15 +1,25 @@
 import { ImageResponse } from "next/og";
 
 import { siteConfig } from "@/lib/config";
+import { pixelLogoDataUri } from "@/lib/pixel-logo";
 
-export const size = { width: 64, height: 64 };
-export const contentType = "image/png";
+// The favicon and app icon, drawn from the logo in site.config.ts: the pixel
+// mark when person.logoPixel is set, otherwise the first initial on the
+// primary colour. 32 px for browser tabs, 192 px for Android and search results.
+export function generateImageMetadata() {
+  return [
+    { id: "32", size: { width: 32, height: 32 }, contentType: "image/png" },
+    { id: "192", size: { width: 192, height: 192 }, contentType: "image/png" },
+  ];
+}
 
-// Favicon generated from the initials and primary colour in site.config.ts.
-export default function Icon() {
-  const { theme, person } = siteConfig;
+export default async function Icon({ id }: { id: Promise<string> }) {
+  const px = Number(await id);
+  const { person, theme } = siteConfig;
   return new ImageResponse(
-    (
+    person.logoPixel ? (
+      <img src={pixelLogoDataUri(person.logoPixel, "dark")} alt="" width={px} height={px} />
+    ) : (
       <div
         style={{
           width: "100%",
@@ -17,18 +27,16 @@ export default function Icon() {
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
+          borderRadius: px / 5,
           background: theme.primary,
-          color: theme.primaryForeground,
-          border: "5px solid #000",
-          borderRadius: 10,
-          fontSize: 30,
-          fontWeight: 900,
-          fontFamily: "sans-serif",
+          color: "#fff",
+          fontSize: px * 0.7,
+          fontWeight: 700,
         }}
       >
-        {person.initials}
+        {person.initials.charAt(0)}
       </div>
     ),
-    { ...size }
+    { width: px, height: px },
   );
 }

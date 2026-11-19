@@ -62,7 +62,7 @@ export function ProjectsGrid({
     <div>
       <div className="mb-8 flex flex-col gap-5">
         <div className="flex flex-col gap-2">
-          <span className="text-xs font-black tracking-wide text-muted-foreground uppercase">
+          <span className="text-xs font-semibold tracking-wide text-muted-foreground uppercase">
             Technology
           </span>
           <CollapsibleTagRow>
@@ -83,7 +83,7 @@ export function ProjectsGrid({
         </div>
         {industryTags.length > 0 && (
           <div className="flex flex-col gap-2">
-            <span className="text-xs font-black tracking-wide text-muted-foreground uppercase">
+            <span className="text-xs font-semibold tracking-wide text-muted-foreground uppercase">
               Industry
             </span>
             <CollapsibleTagRow>
@@ -106,7 +106,7 @@ export function ProjectsGrid({
       {followProjects.length > 0 && (
         <>
           <div className="mt-12 mb-6 flex items-center gap-3">
-            <span className="rounded-lg border-2 border-border bg-foreground px-3 py-1 text-xs font-black tracking-wide text-background uppercase">
+            <span className="rounded-lg border border-border bg-foreground px-3 py-1 text-xs font-semibold tracking-wide text-background uppercase">
               {SECTION_LABELS[follow]}
             </span>
             <span className="h-0.5 flex-1 bg-border" />
@@ -141,7 +141,7 @@ function ProjectCardGrid({
     >
       {projects.map((project) => (
         <Link key={project.id} href={`/projects/${project.slug}`}>
-          <Card className="h-full gap-0 overflow-hidden py-0 transition-transform hover:-translate-y-0.5">
+          <Card className="h-full gap-0 overflow-hidden py-0 transition-transform">
             <ProjectCoverImage
               id={project.id}
               coverImageUrl={project.coverImageUrl}
@@ -189,7 +189,7 @@ function FilterChip({
     <button
       type="button"
       onClick={onClick}
-      className={`rounded-lg border-2 border-border px-3 py-1.5 text-sm font-bold shadow-brutal-sm transition-all hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-brutal ${
+      className={`rounded-lg border border-border px-3 py-1.5 text-sm font-bold shadow-brutal-sm transition-all hover:shadow-brutal ${
         active
           ? variant === "industry"
             ? "bg-accent text-accent-foreground"

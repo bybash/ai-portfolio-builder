@@ -5,7 +5,7 @@ import { createExperience } from "../actions";
 export default function NewExperiencePage() {
   return (
     <div>
-      <h1 className="mb-6 text-3xl font-black">New role</h1>
+      <h1 className="mb-6 text-3xl font-semibold">New role</h1>
       <ExperienceForm action={createExperience} />
     </div>
   );

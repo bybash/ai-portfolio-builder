@@ -22,7 +22,8 @@ export function CollapsibleTagRow({ children }: { children: React.ReactNode }) {
   }, [children]);
 
   return (
-    <div>
+    // The row and its "Show more" fade in together, as one block.
+    <div data-reveal>
       <div className="-m-1">
         <div
           ref={rowRef}
@@ -36,7 +37,7 @@ export function CollapsibleTagRow({ children }: { children: React.ReactNode }) {
         <button
           type="button"
           onClick={() => setExpanded((e) => !e)}
-          className="mt-2 text-xs font-bold text-muted-foreground underline underline-offset-2 hover:text-foreground"
+          className="mt-2 text-xs font-normal text-muted-foreground underline underline-offset-2 hover:text-foreground"
         >
           {expanded ? "Show less" : "Show more"}
         </button>

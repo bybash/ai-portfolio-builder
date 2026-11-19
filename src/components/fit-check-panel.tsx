@@ -79,7 +79,7 @@ export function FitCheckPanel({ allowUpload, showCv }: { allowUpload: boolean; s
           onChange={(e) => setJobDescription(e.target.value)}
           placeholder="Paste the job description here…"
           rows={6}
-          className="w-full rounded-lg border-2 border-border bg-background px-3 py-2 text-sm"
+          className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm"
         />
 
         <div className="flex flex-wrap items-center gap-3">
@@ -113,16 +113,16 @@ export function FitCheckPanel({ allowUpload, showCv }: { allowUpload: boolean; s
         </div>
 
         {error && (
-          <p className="rounded-lg border-2 border-border bg-destructive/10 px-3 py-2 text-sm font-bold text-destructive">
+          <p className="rounded-lg border border-border bg-destructive/10 px-3 py-2 text-sm font-bold text-destructive">
             {error}
           </p>
         )}
       </form>
 
       {result && (
-        <div className="mt-5 flex flex-col gap-4 border-t-2 border-dashed border-border pt-5">
+        <div className="mt-5 flex flex-col gap-4 border-t border-dashed border-border pt-5">
           <span
-            className={`w-fit rounded-lg border-2 border-border px-3 py-1 text-sm font-black uppercase shadow-brutal-sm ${VERDICT_STYLES[result.verdict]}`}
+            className={`w-fit rounded-lg border border-border px-3 py-1 text-sm font-semibold uppercase shadow-brutal-sm ${VERDICT_STYLES[result.verdict]}`}
           >
             {result.verdict}
           </span>

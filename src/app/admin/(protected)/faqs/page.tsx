@@ -12,7 +12,7 @@ export default async function AdminFaqsPage() {
   return (
     <div>
       <div className="mb-6">
-        <h1 className="text-3xl font-black">FAQ</h1>
+        <h1 className="text-3xl font-semibold">FAQ</h1>
         <p className="mt-1 text-muted-foreground">
           Shown on the homepage, and used as context by the chat, the fit
           check and the MCP server.

@@ -58,7 +58,7 @@ export function LightboxImage({
             type="button"
             aria-label="Close"
             onClick={() => setOpen(false)}
-            className="absolute top-5 right-5 flex size-10 items-center justify-center rounded-lg border-2 border-border bg-card text-xl font-black shadow-brutal-sm"
+            className="absolute top-5 right-5 flex size-10 items-center justify-center rounded-lg border border-border bg-card text-xl font-semibold shadow-brutal-sm"
           >
             ×
           </button>
@@ -66,7 +66,7 @@ export function LightboxImage({
           <img
             src={src}
             alt={alt}
-            className="max-h-[90vh] max-w-[90vw] cursor-zoom-out rounded-lg border-2 border-border object-contain shadow-brutal"
+            className="max-h-[90vh] max-w-[90vw] cursor-zoom-out rounded-lg border border-border object-contain shadow-brutal"
           />
         </div>
       )}

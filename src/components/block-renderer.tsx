@@ -15,7 +15,7 @@ function Heading({ data }: { data: unknown }) {
   const { text, level } = parseBlockData("heading", data);
   const Tag = level === 3 ? "h3" : "h2";
   return (
-    <Tag className="mt-10 mb-4 text-2xl font-black tracking-tight first:mt-0 md:text-3xl">
+    <Tag className="mt-10 mb-4 text-2xl font-semibold first:mt-0 md:text-3xl">
       {text}
     </Tag>
   );
@@ -32,7 +32,7 @@ function Paragraph({ data }: { data: unknown }) {
             href={part}
             target="_blank"
             rel="noopener noreferrer"
-            className="break-all font-bold text-link underline underline-offset-2"
+            className="break-all font-normal text-link underline underline-offset-2"
           >
             {part}
           </a>
@@ -47,8 +47,8 @@ function Paragraph({ data }: { data: unknown }) {
 function ImageBlock({ data }: { data: unknown }) {
   const { url, alt, caption } = parseBlockData("image", data);
   return (
-    <figure className="mb-6 flex flex-col items-center">
-      <div className="inline-block overflow-hidden rounded-lg border-2 border-border shadow-brutal">
+    <figure className="mb-6 flex flex-col items-start">
+      <div className="inline-block overflow-hidden rounded-lg border border-border shadow-brutal">
         <LightboxImage src={url} alt={alt} />
       </div>
       {caption ? (
@@ -63,8 +63,8 @@ function ImageBlock({ data }: { data: unknown }) {
 function DiagramBlock({ data }: { data: unknown }) {
   const { url, alt, caption } = parseBlockData("diagram", data);
   return (
-    <figure className="mb-6 flex flex-col items-center">
-      <div className="inline-block overflow-hidden rounded-lg border-2 border-border bg-card shadow-brutal">
+    <figure className="mb-6 flex flex-col items-start">
+      <div className="inline-block overflow-hidden rounded-lg border border-border bg-card shadow-brutal">
         <LightboxImage src={url} alt={alt} padded />
       </div>
       {caption ? (
@@ -79,7 +79,7 @@ function DiagramBlock({ data }: { data: unknown }) {
 function YoutubeBlock({ data }: { data: unknown }) {
   const { videoId, caption } = parseBlockData("youtube", data);
   return (
-    <figure className="mb-6">
+    <figure className="mb-6 min-w-0">
       <IframeEmbed
         src={`https://www.youtube-nocookie.com/embed/${videoId}`}
         title={caption ?? "Project video"}
@@ -123,7 +123,7 @@ function EmbedBlock({ data }: { data: unknown }) {
         {url.startsWith("https://") ? (
           <>
             :{" "}
-            <a href={url} target="_blank" rel="noopener noreferrer" className="font-bold underline">
+            <a href={url} target="_blank" rel="noopener noreferrer" className="font-normal underline">
               open it in a new tab
             </a>
           </>
@@ -151,9 +151,9 @@ function EmbedBlock({ data }: { data: unknown }) {
 function CodeBlock({ data }: { data: unknown }) {
   const { code, language } = parseBlockData("code", data);
   return (
-    <div className="mb-6 overflow-hidden rounded-lg border-2 border-border shadow-brutal">
+    <div className="mb-6 overflow-hidden rounded-lg border border-border shadow-brutal">
       {language ? (
-        <div className="border-b-2 border-border bg-foreground px-4 py-1.5 font-mono text-xs font-bold text-background">
+        <div className="border-b border-border bg-foreground px-4 py-1.5 font-mono text-xs font-bold text-background">
           {language}
         </div>
       ) : null}
@@ -174,6 +174,26 @@ const renderers: Record<string, (props: { data: unknown }) => React.ReactNode> =
   embed: EmbedBlock,
 };
 
+const isHalfVideo = (block: Block) =>
+  block.type === "youtube" && parseBlockData("youtube", block.data).width === "half";
+
+// Runs of half-width videos become one two-column group; every other block renders on its own.
+function groupBlocks(blocks: Block[]) {
+  const groups: Block[][] = [];
+  for (const block of [...blocks].sort((a, b) => a.order - b.order)) {
+    const last = groups.at(-1);
+    if (last && isHalfVideo(block) && isHalfVideo(last[0])) last.push(block);
+    else groups.push([block]);
+  }
+  return groups;
+}
+
+function renderBlock(block: Block) {
+  const Renderer = renderers[block.type as BlockType];
+  if (!Renderer) return null;
+  return <Renderer key={block.id} data={block.data} />;
+}
+
 export function BlockRenderer({
   blocks,
   className,
@@ -183,13 +203,15 @@ export function BlockRenderer({
 }) {
   return (
     <div className={cn(className)}>
-      {[...blocks]
-        .sort((a, b) => a.order - b.order)
-        .map((block) => {
-          const Renderer = renderers[block.type as BlockType];
-          if (!Renderer) return null;
-          return <Renderer key={block.id} data={block.data} />;
-        })}
+      {groupBlocks(blocks).map((group) =>
+        isHalfVideo(group[0]) ? (
+          <div key={group[0].id} className="grid grid-cols-1 gap-x-6 sm:grid-cols-2">
+            {group.map(renderBlock)}
+          </div>
+        ) : (
+          renderBlock(group[0])
+        ),
+      )}
     </div>
   );
 }

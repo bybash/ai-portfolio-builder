@@ -105,7 +105,7 @@ export function ExperienceForm({
       </div>
 
       {state.error && (
-        <p className="rounded-lg border-2 border-border bg-destructive/10 p-3 text-sm font-bold text-destructive">
+        <p className="rounded-lg border border-border bg-destructive/10 p-3 text-sm font-bold text-destructive">
           {state.error}
         </p>
       )}

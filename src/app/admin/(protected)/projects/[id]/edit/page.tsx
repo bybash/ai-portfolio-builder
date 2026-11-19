@@ -26,7 +26,7 @@ export default async function EditProjectPage({
 
   return (
     <div>
-      <h1 className="mb-6 text-3xl font-black">Edit project</h1>
+      <h1 className="mb-6 text-3xl font-semibold">Edit project</h1>
       <ProjectForm action={boundUpdate} allTags={allTags} project={project} />
     </div>
   );
