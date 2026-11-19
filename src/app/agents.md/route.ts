@@ -1,10 +1,12 @@
-import { features, siteConfig, siteUrl } from "@/lib/config";
+import { siteConfig, siteUrl } from "@/lib/config";
+import { getFeatures } from "@/lib/site-settings";
 
 // /agents.md: instructions for AI agents (recruiting assistants, screening
 // tools, search assistants) on where the facts are and how to use them.
-export const dynamic = "force-static";
+export const dynamic = "force-dynamic";
 
-export function GET() {
+export async function GET() {
+  const features = await getFeatures();
   const { person, contact, socials, agents } = siteConfig;
   const first = person.firstName;
   const lines = [

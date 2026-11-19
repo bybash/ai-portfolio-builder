@@ -1,10 +1,11 @@
-import { siteConfig, siteUrl } from "@/lib/config";
+import { siteUrl } from "@/lib/config";
+import { getSite } from "@/lib/site-settings";
 
 // schema.org data for search engines and AI tools: the home page is a
 // ProfilePage about one Person, with the current role, education,
 // certificates, skills and the profiles that are the same person (sameAs).
-export function PersonJsonLd() {
-  const { person, socials, seo, home } = siteConfig;
+export async function PersonJsonLd() {
+  const { person, socials, seo, home } = await getSite();
   // Certificates only; education is in alumniOf.
   const credentials = home.credentials.filter((c) => c.year && c.title !== person.alumniOf && c.issuer !== person.alumniOf);
   const data = {

@@ -4,6 +4,11 @@ import { ImageResponse } from "next/og";
 
 import { siteConfig } from "@/lib/config";
 import { pixelLogoDataUri } from "@/lib/pixel-logo";
+import { getSite } from "@/lib/site-settings";
+
+// Read per request, so a logo saved in /admin/settings shows straight away and
+// `next build` never needs a database.
+export const dynamic = "force-dynamic";
 
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
@@ -21,7 +26,7 @@ const mime = (path: string) => (path.endsWith(".png") ? "image/png" : "image/jpe
 // Share image built from site.config.ts: logo, name, headline and tagline on the
 // dark theme, with the photo on the right and the accent palette as a top bar.
 export default async function Image() {
-  const { theme, darkTheme, person, hero, seo } = siteConfig;
+  const { theme, darkTheme, person, hero, seo } = await getSite();
   const t = darkTheme ?? theme;
   const logoPath = person.logoPixel ? null : person.logoDark || person.logo;
   const photoPath = person.photo.startsWith("/") && !person.photo.endsWith(".svg") ? person.photo : null;

@@ -1,14 +1,20 @@
 import Link from "next/link";
 import {
   BadgeCheck,
+  Compass,
   Handshake,
   IterationCw,
+  Lightbulb,
   MessagesSquare,
   PackageOpen,
   Puzzle,
+  Rocket,
   SearchCheck,
+  ShieldCheck,
   Sprout,
   Target,
+  Users,
+  Wrench,
   type LucideIcon,
 } from "lucide-react";
 
@@ -27,7 +33,16 @@ const TRAIT_ICONS: Record<string, LucideIcon> = {
   "badge-check": BadgeCheck,
   handshake: Handshake,
   messages: MessagesSquare,
+  lightbulb: Lightbulb,
+  rocket: Rocket,
+  compass: Compass,
+  users: Users,
+  shield: ShieldCheck,
+  wrench: Wrench,
 };
+
+// For the icon picker in /admin/settings.
+export const TRAIT_ICON_NAMES = Object.keys(TRAIT_ICONS);
 
 // Icon colours cycle through the theme's accent tints (CSS variables, so they
 // follow the light or dark palette). The base --accent is skipped: in dark mode

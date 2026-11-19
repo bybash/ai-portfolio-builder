@@ -93,7 +93,7 @@ ${GUARD_RULES}
 Style: ${siteConfig.chat.style} Keep answers concise (2 to 4 sentences unless the question needs more).`;
 
 export async function answerChatQuestion(question: string): Promise<string> {
-  const easterEgg = checkEasterEgg(question);
+  const easterEgg = await checkEasterEgg(question);
   if (easterEgg) return easterEgg;
 
   const queryEmbedding = await embedText(question);

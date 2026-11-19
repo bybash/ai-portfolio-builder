@@ -6,7 +6,7 @@ import { usePathname } from "next/navigation";
 import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
-import { Logo } from "@/components/logo";
+import { Logo, type LogoMark } from "@/components/logo";
 import { SocialIcon } from "@/components/social-icon";
 import { ThemeToggle } from "@/components/theme-toggle";
 
@@ -18,6 +18,7 @@ export type SiteHeaderProps = {
 type SiteHeaderNavProps = SiteHeaderProps & {
   name: string;
   initials: string;
+  mark: LogoMark;
   session: { version: string; versionTitle: string; subtitle: string; home: string };
   showCv: boolean;
   showThemeToggle: boolean;
@@ -40,7 +41,7 @@ const ICON_BUTTON =
 const navLinkClass = (isActive: boolean) =>
   `text-base font-medium ${isActive ? "text-foreground" : "text-muted-foreground hover:text-foreground"}`;
 
-export function SiteHeaderNav({ active, back, name, initials, session, showCv, showThemeToggle, socials }: SiteHeaderNavProps) {
+export function SiteHeaderNav({ active, back, name, initials, mark, session, showCv, showThemeToggle, socials }: SiteHeaderNavProps) {
   const [menuOpen, setMenuOpen] = useState(false);
   const pathname = usePathname();
   const cwd = pathname && pathname !== "/" ? `${session.home}${pathname}` : session.home;
@@ -69,7 +70,7 @@ export function SiteHeaderNav({ active, back, name, initials, session, showCv, s
         {/* The logo with a terminal-style session block: name and version, the
             current role, and a working directory that follows the page. */}
         <Link href="/" className="flex min-w-0 items-center gap-3" onMouseEnter={replayLogo}>
-          <Logo initials={initials} className="size-10 shrink-0 lg:size-13" />
+          <Logo initials={initials} mark={mark} className="size-10 shrink-0 lg:size-13" />
           <span className="flex min-w-0 flex-col font-mono text-xs leading-snug">
             <span className="whitespace-nowrap">
               <span className="text-sm font-semibold text-foreground">{name}</span>{" "}

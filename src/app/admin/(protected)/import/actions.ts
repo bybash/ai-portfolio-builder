@@ -3,6 +3,7 @@
 // The draft itself is made by POST /api/admin/import (it takes file uploads).
 // Saving the reviewed draft is a server action: it only sends small JSON.
 import { revalidatePath } from "next/cache";
+import { after } from "next/server";
 import { z } from "zod";
 
 import { requireAdmin } from "@/lib/auth";
@@ -10,6 +11,7 @@ import { prisma } from "@/lib/prisma";
 import { saveDraftToDatabase } from "@/lib/profile-import/save";
 import { draftSchema } from "@/lib/profile-import/schema";
 import { syncRagIndexAfterResponse } from "@/lib/rag-sync-after";
+import { purgeCdn } from "@/lib/site-settings";
 
 // A full draft is well under 100 KB; anything far bigger is not one.
 const MAX_DRAFT_JSON = 200_000;
@@ -36,6 +38,7 @@ export async function saveImportDraft(draftInput: unknown, selectionInput: unkno
     const saved = await saveDraftToDatabase(prisma, draft.data, selection.data);
     syncRagIndexAfterResponse();
     revalidatePath("/", "layout");
+    after(purgeCdn);
     return { error: null, ...saved };
   } catch (err) {
     console.error("Saving the import failed", err);

@@ -1,10 +1,12 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { after } from "next/server";
 import { z } from "zod";
 
 import { requireAdmin } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { purgeCdn } from "@/lib/site-settings";
 
 export type TagFormState = {
   error: string | null;
@@ -54,6 +56,7 @@ export async function createTag(
   revalidatePath("/admin/projects/new");
   revalidatePath("/projects");
   revalidatePath("/");
+  after(purgeCdn);
 
   return { error: null };
 }
@@ -65,4 +68,5 @@ export async function deleteTag(id: string) {
   revalidatePath("/admin/projects/new");
   revalidatePath("/projects");
   revalidatePath("/");
+  after(purgeCdn);
 }

@@ -3,19 +3,21 @@ import Link from "next/link";
 import { Logo } from "@/components/logo";
 import { Button } from "@/components/ui/button";
 import { siteConfig } from "@/lib/config";
+import { getSite, logoMark } from "@/lib/site-settings";
 
 import { logout } from "../actions";
 
 // Admin pages always read fresh data and never prerender at build time.
 export const dynamic = "force-dynamic";
 
-export default function AdminLayout({ children }: { children: React.ReactNode }) {
+export default async function AdminLayout({ children }: { children: React.ReactNode }) {
+  const site = await getSite();
   return (
     <div className="flex flex-1 flex-col bg-background text-foreground">
       <div className="mx-auto w-full max-w-5xl px-6">
         <nav className="flex flex-col gap-4 border-b border-border py-6 sm:flex-row sm:items-center sm:justify-between">
           <Link href="/admin/projects" className="flex items-center gap-2 text-xl font-semibold">
-            <Logo initials={siteConfig.person.initials} className="size-8" />
+            <Logo initials={siteConfig.person.initials} mark={logoMark(site)} className="size-8" />
             {siteConfig.admin.label}
           </Link>
           <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
@@ -33,6 +35,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             </Link>
             <Link href="/admin/import" className="text-sm font-bold hover:underline">
               Import
+            </Link>
+            <Link href="/admin/settings" className="text-sm font-bold hover:underline">
+              Settings
             </Link>
             <Link href="/" className="text-sm font-bold hover:underline">
               View site

@@ -2,12 +2,14 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { after } from "next/server";
 import { z } from "zod";
 
 import { blockDataSchemas, type BlockType } from "@/lib/blocks";
 import { requireAdmin } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { syncRagIndexAfterResponse } from "@/lib/rag-sync-after";
+import { purgeCdn } from "@/lib/site-settings";
 import type { Prisma } from "@/generated/prisma/client";
 
 export type ProjectFormState = {
@@ -119,6 +121,7 @@ export async function createProject(
   revalidatePath("/admin/projects");
   revalidatePath("/projects");
   revalidatePath("/");
+  after(purgeCdn);
   redirect("/admin/projects");
 }
 
@@ -174,6 +177,7 @@ export async function updateProject(
   revalidatePath("/projects");
   revalidatePath(`/projects/${data.slug}`);
   revalidatePath("/");
+  after(purgeCdn);
   redirect("/admin/projects");
 }
 
@@ -184,6 +188,7 @@ export async function deleteProject(id: string) {
   revalidatePath("/admin/projects");
   revalidatePath("/projects");
   revalidatePath("/");
+  after(purgeCdn);
 }
 
 export async function moveProject(id: string, direction: "up" | "down") {
@@ -217,4 +222,5 @@ export async function moveProject(id: string, direction: "up" | "down") {
   revalidatePath("/admin/projects");
   revalidatePath("/projects");
   revalidatePath("/");
+  after(purgeCdn);
 }

@@ -1,5 +1,6 @@
-import { features, siteConfig, siteUrl } from "@/lib/config";
+import { siteUrl } from "@/lib/config";
 import { prisma } from "@/lib/prisma";
+import { getFeatures, getSite } from "@/lib/site-settings";
 
 // /llms.txt: a plain-text map of the site for AI tools (https://llmstxt.org).
 // Read per request, so `next build` never needs a database.
@@ -8,7 +9,8 @@ export const dynamic = "force-dynamic";
 const year = (d: Date | null) => (d ? String(d.getUTCFullYear()) : "now");
 
 export async function GET() {
-  const { person, seo, contact, socials } = siteConfig;
+  const [site, features] = await Promise.all([getSite(), getFeatures()]);
+  const { person, seo, contact, socials } = site;
   const [projects, roles] = await Promise.all([
     prisma.project.findMany({ orderBy: [{ category: "asc" }, { order: "asc" }], select: { slug: true, title: true, summary: true } }),
     prisma.experience.findMany({ orderBy: [{ order: "asc" }, { id: "asc" }], select: { title: true, company: true, startDate: true, endDate: true } }),
@@ -24,7 +26,7 @@ export async function GET() {
     "## Pages",
     `- [About me](${siteUrl}/about)`,
     `- [Work](${siteUrl}/projects): case studies, each with what I did and how`,
-    ...(siteConfig.home.traits.length > 0
+    ...(site.home.traits.length > 0
       ? [`- [How I work](${siteUrl}/how-i-work): working habits, each with a project as proof`]
       : []),
     `- [Experience](${siteUrl}/experience): every role, with dates`,

@@ -3,10 +3,11 @@ import path from "path";
 
 import { NextResponse } from "next/server";
 
-import { features, siteConfig } from "@/lib/config";
+import { siteConfig } from "@/lib/config";
+import { getFeatures } from "@/lib/site-settings";
 
 export async function GET() {
-  if (!features.cv) {
+  if (!(await getFeatures()).cv) {
     return NextResponse.json({ error: "Not found." }, { status: 404 });
   }
 

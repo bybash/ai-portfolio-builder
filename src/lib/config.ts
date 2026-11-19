@@ -7,7 +7,7 @@ export { siteConfig };
 type FeatureName = keyof typeof siteConfig.features;
 
 // Env var names that override each flag in site.config.ts.
-const FEATURE_ENV: Record<FeatureName, string> = {
+export const FEATURE_ENV: Record<FeatureName, string> = {
   chat: "FEATURE_CHAT",
   fitCheck: "FEATURE_FIT_CHECK",
   parseJd: "FEATURE_PARSE_JD",
@@ -18,7 +18,7 @@ const FEATURE_ENV: Record<FeatureName, string> = {
   rateLimit: "FEATURE_RATE_LIMIT",
 };
 
-function envFlag(name: string): boolean | undefined {
+export function envFlag(name: string): boolean | undefined {
   const raw = process.env[name]?.trim().toLowerCase();
   if (!raw) return undefined;
   if (["1", "true", "on", "yes"].includes(raw)) return true;
@@ -26,8 +26,10 @@ function envFlag(name: string): boolean | undefined {
   return undefined;
 }
 
-function resolveFeatures() {
-  const out = { ...siteConfig.features };
+// The flags after env overrides and the AI checks. `base` is the file's flags,
+// or the file's with the admin's settings on top (getFeatures in site-settings.ts).
+export function resolveFeatures(base: typeof siteConfig.features = siteConfig.features) {
+  const out = { ...base };
   for (const key of Object.keys(FEATURE_ENV) as FeatureName[]) {
     const override = envFlag(FEATURE_ENV[key]);
     if (override !== undefined) out[key] = override;
@@ -43,8 +45,11 @@ function resolveFeatures() {
   return out;
 }
 
-// Resolved on the server. Client components get the flags they need as props,
-// because env overrides are not visible in the browser bundle.
+// Resolved on the server from the file and env only. Use it for `admin` and
+// `rateLimit`, which the admin cannot change; for the other flags use
+// `await getFeatures()` from site-settings.ts, which includes the admin's
+// settings. Client components get the flags they need as props, because env
+// overrides are not visible in the browser bundle.
 export const features = resolveFeatures();
 
 export type Features = typeof features;

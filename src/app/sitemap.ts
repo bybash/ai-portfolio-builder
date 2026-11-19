@@ -1,7 +1,8 @@
 import type { MetadataRoute } from "next";
 
-import { features, siteUrl } from "@/lib/config";
+import { siteUrl } from "@/lib/config";
 import { prisma } from "@/lib/prisma";
+import { getFeatures } from "@/lib/site-settings";
 
 // Read per request, so `next build` never needs a database.
 export const dynamic = "force-dynamic";
@@ -9,6 +10,7 @@ export const dynamic = "force-dynamic";
 const PAGES = ["", "/about", "/projects", "/how-i-work", "/experience", "/side-projects"];
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  const features = await getFeatures();
   const projects = await prisma.project.findMany({ select: { slug: true, updatedAt: true } });
   return [
     ...PAGES.map((path) => ({ url: `${siteUrl}${path}` })),

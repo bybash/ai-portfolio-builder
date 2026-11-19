@@ -6,14 +6,20 @@ import { RichText } from "@/components/rich-text";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { Button } from "@/components/ui/button";
-import { features, siteConfig } from "@/lib/config";
+import { siteConfig } from "@/lib/config";
+import { getFeatures, getSite } from "@/lib/site-settings";
 
 export const metadata = { title: `About me | ${siteConfig.person.name}` };
 
+// Read per request, so settings saved in /admin show straight away and
+// `next build` never needs a database.
+export const dynamic = "force-dynamic";
+
 // The Who page: a short biography, the career in four steps and the
 // credentials, with the CV download when that feature is on.
-export default function AboutPage() {
-  const { about, person, contact, home } = siteConfig;
+export default async function AboutPage() {
+  const [site, features] = await Promise.all([getSite(), getFeatures()]);
+  const { about, person, contact, home } = site;
   const { journey, credentials } = home;
 
   return (

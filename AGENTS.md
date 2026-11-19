@@ -19,6 +19,7 @@ Next.js 16 (App Router, Turbopack), React 19, TypeScript, Tailwind CSS 4, shadcn
 ## Where things live
 
 * `site.config.ts`: all person-specific values and feature flags. Never hard-code a name, link or colour in a component; read it from config.
+* `src/lib/site-settings.ts`: the settings saved in `/admin/settings` (one `SiteSettings` row), merged over `site.config.ts`. Server code that shows the hero, home sections, about, footer, session block, pixel logo or the chat, fit check, file upload, MCP, CV and canned-answer flags reads them with `await getSite()` and `await getFeatures()`, not `siteConfig` and `features`, or admin edits will not show. The editable sections and their schemas are in `src/lib/site-settings-schema.ts`.
 * `src/lib/config.ts`: resolves env overrides (feature flags, models, site URL, rate limits). Client components cannot see server env vars, so pass flags to them as props from a server component.
 * `src/lib/ai-env.ts` and `src/lib/ai-client.ts`: the AI provider (`AI_API_KEY`, `AI_BASE_URL`, `CHAT_MODEL`, `EMBEDDING_*`; `OPENAI_API_KEY` still works). Create chat and embedding clients only through `ai-client.ts`, check `aiConfigured()` / `embeddingsConfigured()` instead of reading env vars, and parse JSON answers with `chatJson()` (some providers ignore JSON mode).
 * `src/lib/rag.ts`: retrieval and prompts. `src/lib/rag-sync.ts`: incremental index sync.

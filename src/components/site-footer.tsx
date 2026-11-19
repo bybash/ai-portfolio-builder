@@ -1,12 +1,14 @@
 import Link from "next/link";
 
 import { Logo } from "@/components/logo";
-import { features, siteConfig, socialLinks } from "@/lib/config";
+import { socialLinks } from "@/lib/config";
+import { getFeatures, getSite, logoMark } from "@/lib/site-settings";
 
 const year = new Date().getFullYear();
 
-export function SiteFooter() {
-  const { person, contact, footer } = siteConfig;
+export async function SiteFooter() {
+  const [site, features] = await Promise.all([getSite(), getFeatures()]);
+  const { person, contact, footer } = site;
 
   return (
     <footer className="border-t border-border">
@@ -14,7 +16,7 @@ export function SiteFooter() {
         <div className="flex flex-wrap items-start justify-between gap-10">
           <div className="max-w-xs">
             <Link href="/" className="flex items-center gap-2 text-xl font-semibold">
-              <Logo initials={person.initials} className="size-8" />
+              <Logo initials={person.initials} mark={logoMark(site)} className="size-8" />
               {person.name}
             </Link>
             <p className="mt-3 text-sm text-muted-foreground">{person.oneLiner}</p>

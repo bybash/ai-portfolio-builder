@@ -14,6 +14,7 @@
 > * **AI discovery.** `/llms.txt`, `/llms-full.txt` (the whole site as Markdown) and `/agents.md`, ProfilePage structured data, `robots.txt` and `sitemap.xml`.
 > * **Netlify support.** `netlify.toml`, CDN caching for public pages, and a fix for the HTML comment Netlify adds to `<head>`, which made React re-render the page.
 > * **Optional PostHog analytics**, off until `NEXT_PUBLIC_POSTHOG_KEY` is set, proxied through the site.
+> * **Settings in the admin.** `/admin/settings` edits the hero, the home sections, How I work, the stack, the About page, the pixel logo (a grid editor with a live preview), the session block, the footer and the feature flags. Saved values are stored in the database and override `site.config.ts`, which stays the default; each section can be reset to the file.
 > * **Accessibility:** a `<main>` landmark on every page.
 
 ![AI Portfolio Builder banner](docs/images/banner.png)
@@ -287,7 +288,7 @@ Open http://localhost:3000.
 
 ### Deploy to Netlify
 
-`netlify.toml` runs the same build as Vercel (`npm run vercel-build`). Add the same environment variables in Netlify; `NEXT_PUBLIC_SITE_URL` is only needed for a custom domain, otherwise Netlify's `URL` is used. Public pages are kept on Netlify's CDN for 5 minutes and refreshed in the background, so an edit in `/admin` can take up to 5 minutes to show. PostHog events are proxied at Netlify's edge (see `netlify.toml`), because Next.js rewrites run in a function there and break the compressed event bodies.
+`netlify.toml` runs the same build as Vercel (`npm run vercel-build`). Add the same environment variables in Netlify; `NEXT_PUBLIC_SITE_URL` is only needed for a custom domain, otherwise Netlify's `URL` is used. Public pages are kept on Netlify's CDN for 5 minutes and refreshed in the background, so an edit in `/admin` could take up to 5 minutes to show; every admin save purges that cache when `NETLIFY_PURGE_API_TOKEN` and `SITE_ID` are set (see [Environment variables](#environment-variables)). PostHog events are proxied at Netlify's edge (see `netlify.toml`), because Next.js rewrites run in a function there and break the compressed event bodies.
 
 ### What happens on deploy
 
@@ -316,6 +317,7 @@ Without `DATABASE_URL` the steps are skipped and only the site is built. `npm ru
 | `FEATURE_*` | No | Feature flag overrides, see below. |
 | `RATE_LIMIT_PER_MINUTE`, `RATE_LIMIT_PER_DAY` | No | Per-IP limits for the AI endpoints. |
 | `NEXT_PUBLIC_POSTHOG_KEY` | No | PostHog project API key (`phc_...`). Analytics stay off without it. Events go through `/ingest` on your own domain; `/admin` is never tracked and surveys are off. |
+| `NETLIFY_PURGE_API_TOKEN`, `SITE_ID` | No | When both are set, every admin save purges Netlify's CDN cache, so the edit shows at once instead of within 5 minutes. Netlify provides them to the site's functions; if saves do not show at once, set them yourself (a personal access token and the site's ID). |
 | `NEXT_PUBLIC_POSTHOG_REGION` | No | `eu` (default) or `us`, where your PostHog project lives. On Netlify, also change the `eu` hosts in `netlify.toml`. |
 | `GITHUB_TOKEN` | No | Used by the profile import for a higher GitHub rate limit. Without it, GitHub allows 60 requests an hour. |
 
@@ -352,7 +354,7 @@ Not every provider honours JSON mode, so the fit check and the profile import as
 2. **`content/`** holds the sample content. Replace `content/projects/*.json` (same shape as `scripts/example-project.json`), `content/experience.json` and `content/faqs.json`, then run `npm run db:seed` and `npm run rag:ingest`. The seed upserts by slug, so remove the sample projects in `/admin` or with `npm run project:delete -- <slug>`.
 3. **Images** go in `public/`. Project images live in `public/projects/<slug>/`; their sizes are measured at install and build time so covers of the right shape fill their card. Replace `public/avatar.svg` with your photo (and update `person.photo`).
 4. **CV:** replace `public/cv.pdf` with your own.
-5. **`/admin`** lets you edit all content in the browser once deployed. Every save updates the chat's search index in the background.
+5. **`/admin`** lets you edit all content in the browser once deployed. Every save updates the chat's search index in the background. In this version, **`/admin/settings`** also edits the hero, home sections, How I work, stack, About page, pixel logo, session block, footer and feature flags. Those values are stored in the database (the `SiteSettings` table) and override `site.config.ts`, which stays the default and the fallback when there is no database; "Reset to site.config.ts" removes a saved section. Your name, contact details, SEO text, chat persona, theme and the `admin` and `rateLimit` flags stay in `site.config.ts`. `FEATURE_*` env vars still win over the flags saved in the admin.
 6. **Projects from the command line or a coding agent:** `npm run project:upsert -- path/to/project.json` creates or updates one project from a JSON file (same shape as `scripts/example-project.json`), and `npm run project:delete -- <slug>` removes one. Both re-sync the chat's search index straight away, so an AI coding assistant can manage your projects for you.
 
 ### Import from LinkedIn, CV and GitHub

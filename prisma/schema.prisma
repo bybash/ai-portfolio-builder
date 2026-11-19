@@ -152,3 +152,12 @@ model Chunk {
 
   @@index([sourceType, sourceId])
 }
+
+// Settings edited in /admin/settings, merged over site.config.ts at request
+// time (src/lib/site-settings.ts). One row (id 1); `data` holds one JSON value
+// per section, and a section that is missing falls back to the file.
+model SiteSettings {
+  id        Int      @id @default(1)
+  data      Json     @default("{}")
+  updatedAt DateTime @updatedAt
+}

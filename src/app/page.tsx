@@ -21,8 +21,9 @@ import { PersonJsonLd } from "@/components/person-json-ld";
 import { SectionLabel } from "@/components/section-label";
 import { SiteHeader } from "@/components/site-header";
 import { TraitRows } from "@/components/trait-rows";
-import { features, siteConfig, siteUrl } from "@/lib/config";
+import { siteUrl } from "@/lib/config";
 import { prisma } from "@/lib/prisma";
+import { getFeatures, getSite } from "@/lib/site-settings";
 
 // Rendered per request, so `next build` never needs a database and content
 // written by the scripts or the admin shows up straight away.
@@ -32,7 +33,7 @@ export const dynamic = "force-dynamic";
 const HOME_TRAITS = 4;
 
 export default async function Home() {
-  const [projects, personalProjects, stackTags, faqs] = await Promise.all([
+  const [projects, personalProjects, stackTags, faqs, site, features] = await Promise.all([
     prisma.project.findMany({
       where: { featured: true, category: "commercial" },
       orderBy: { order: "asc" },
@@ -50,9 +51,11 @@ export default async function Home() {
       orderBy: [{ projects: { _count: "desc" } }, { name: "asc" }],
     }),
     prisma.faq.findMany({ orderBy: { order: "asc" } }),
+    getSite(),
+    getFeatures(),
   ]);
 
-  const { hero, home, person, contact } = siteConfig;
+  const { hero, home, person, contact } = site;
   const { stats, fits, journey, traits, systems, credentials, stackOrder, stackHide } = home;
   // Stack chips: the names in stackOrder first, then the other project tags by use,
   // minus the ones in stackHide.

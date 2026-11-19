@@ -1,6 +1,7 @@
 import { blocksToMarkdown, roleDates } from "@/lib/agent-text";
-import { features, siteConfig, siteUrl } from "@/lib/config";
+import { siteUrl } from "@/lib/config";
 import { prisma } from "@/lib/prisma";
+import { getFeatures, getSite } from "@/lib/site-settings";
 
 // /llms-full.txt: everything on the site in one Markdown file, so an AI agent
 // can read it all in one request (the short map is /llms.txt). Read per
@@ -8,7 +9,8 @@ import { prisma } from "@/lib/prisma";
 export const dynamic = "force-dynamic";
 
 export async function GET() {
-  const { person, seo, contact, socials, about, home } = siteConfig;
+  const [site, features] = await Promise.all([getSite(), getFeatures()]);
+  const { person, seo, contact, socials, about, home } = site;
   const [projects, roles, faqs] = await Promise.all([
     prisma.project.findMany({
       orderBy: [{ category: "asc" }, { order: "asc" }],

@@ -1,7 +1,11 @@
 import { ImageResponse } from "next/og";
 
-import { siteConfig } from "@/lib/config";
 import { pixelLogoDataUri } from "@/lib/pixel-logo";
+import { getSite } from "@/lib/site-settings";
+
+// Read per request, so a logo saved in /admin/settings shows straight away and
+// `next build` never needs a database.
+export const dynamic = "force-dynamic";
 
 // The favicon and app icon, drawn from the logo in site.config.ts: the pixel
 // mark when person.logoPixel is set, otherwise the first initial on the
@@ -15,7 +19,7 @@ export function generateImageMetadata() {
 
 export default async function Icon({ id }: { id: Promise<string> }) {
   const px = Number(await id);
-  const { person, theme } = siteConfig;
+  const { person, theme } = await getSite();
   return new ImageResponse(
     person.logoPixel ? (
       <img src={pixelLogoDataUri(person.logoPixel, "dark")} alt="" width={px} height={px} />
