@@ -358,7 +358,8 @@ export const siteConfig = {
 
   footer: {
     // Plain text; [label](https://...) becomes a link.
-    builtWith: "Built with [Claude Code](https://claude.com/claude-code), from [Mehmet Mutlu's template](https://github.com/mutlumehmet/ai-portfolio-builder)",
+    builtWith:
+      "Built with [Claude Code](https://claude.com/claude-code), from [AI Portfolio Builder](https://github.com/bybash/ai-portfolio-builder), based on [Mehmet Mutlu's template](https://github.com/mutlumehmet/ai-portfolio-builder)",
   },
 
   // /agents.md, the instructions for AI agents (recruiting assistants, search
