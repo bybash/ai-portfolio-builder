@@ -11,17 +11,24 @@ import { Label } from "@/components/ui/label";
 import type { PixelLogoConfig } from "@/lib/pixel-logo";
 
 const MAX = 32;
-const STARTER: Required<PixelLogoConfig> = {
-  rows: Array.from({ length: 12 }, () => ".".repeat(12)),
-  colors: ["#2563eb", "#8b5cf6", "#f472b6"],
-  depth: 2,
-};
 
 // Draws the pixel logo (person.logoPixel): click or drag over the grid to fill
 // or clear pixels, pick the colours that step diagonally across it, and the
 // extrusion depth. The previews use the same component as the site header.
-export function PixelLogoEditor({ initial, saved }: { initial: PixelLogoConfig | null; saved: boolean }) {
-  const start = initial ?? STARTER;
+// `starterColors` (the theme's accents) fill a new logo; `previewBackgrounds`
+// are the light and dark theme backgrounds the previews sit on.
+export function PixelLogoEditor({
+  initial,
+  saved,
+  starterColors,
+  previewBackgrounds,
+}: {
+  initial: PixelLogoConfig | null;
+  saved: boolean;
+  starterColors: string[];
+  previewBackgrounds: { light: string; dark: string | null };
+}) {
+  const start = initial ?? { rows: Array.from({ length: 12 }, () => ".".repeat(12)), colors: starterColors, depth: 2 };
   const [enabled, setEnabled] = useState(initial !== null);
   const [rows, setRows] = useState<string[]>(normalise(start.rows));
   const [colors, setColors] = useState<string[]>(start.colors);
@@ -163,12 +170,14 @@ export function PixelLogoEditor({ initial, saved }: { initial: PixelLogoConfig |
 
           <div className="flex flex-col gap-3">
             <span className="text-sm font-bold">Preview</span>
-            <div className="flex items-center justify-center rounded-lg border border-border bg-white p-6">
+            <div className="flex items-center justify-center rounded-lg border border-border p-6" style={{ background: previewBackgrounds.light }}>
               {hasPixels ? <PixelLogo {...logo} className="size-28" /> : <Empty />}
             </div>
-            <div className="dark flex items-center justify-center rounded-lg border border-border bg-[#061225] p-6">
-              {hasPixels ? <PixelLogo {...logo} className="size-28" /> : <Empty />}
-            </div>
+            {previewBackgrounds.dark && (
+              <div className="dark flex items-center justify-center rounded-lg border border-border p-6" style={{ background: previewBackgrounds.dark }}>
+                {hasPixels ? <PixelLogo {...logo} className="size-28" /> : <Empty />}
+              </div>
+            )}
             <div className="flex items-center gap-3 rounded-lg border border-border p-3">
               {hasPixels && <PixelLogo {...logo} className="size-8" />}
               <span className="text-xs text-muted-foreground">Header size</span>

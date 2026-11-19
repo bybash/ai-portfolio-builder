@@ -6,6 +6,7 @@ import type { SiteConfig } from "@site-config";
 
 import type { LogoMark } from "@/components/logo";
 import { resolveFeatures, siteConfig } from "@/lib/config";
+import { purgeCdn } from "@/lib/cdn";
 import { prisma } from "@/lib/prisma";
 import { parseSettings, settingsSchemas, type SettingsSection, type SiteSettings } from "@/lib/site-settings-schema";
 
@@ -26,17 +27,17 @@ export const readSettings = cache(async (): Promise<SiteSettings> => {
 // site.config.ts with the saved settings on top. Pages and routes that show
 // a setting the admin can change read it from here, not from siteConfig.
 export const getSite = cache(async (): Promise<SiteConfig> => {
-  const s = await readSettings();
+  const saved = await readSettings();
   return {
     ...siteConfig,
-    hero: s.hero ? { ...siteConfig.hero, ...s.hero } : siteConfig.hero,
-    home: { ...siteConfig.home, ...s.home },
-    about: s.about ?? siteConfig.about,
-    footer: s.footer ?? siteConfig.footer,
+    hero: saved.hero ? { ...siteConfig.hero, ...saved.hero } : siteConfig.hero,
+    home: { ...siteConfig.home, ...saved.home },
+    about: saved.about ?? siteConfig.about,
+    footer: saved.footer ?? siteConfig.footer,
     person: {
       ...siteConfig.person,
-      ...(s.session && { session: s.session }),
-      ...(s.logoPixel !== undefined && { logoPixel: s.logoPixel }),
+      ...(saved.session && { session: saved.session }),
+      ...(saved.logoPixel !== undefined && { logoPixel: saved.logoPixel }),
     },
   };
 });
@@ -49,8 +50,8 @@ export function logoMark(site: SiteConfig): LogoMark {
 // The feature flags: the file, then the admin's settings, then FEATURE_* env
 // vars, then the AI checks (see resolveFeatures in config.ts).
 export const getFeatures = cache(async () => {
-  const s = await readSettings();
-  return resolveFeatures({ ...siteConfig.features, ...s.features });
+  const saved = await readSettings();
+  return resolveFeatures({ ...siteConfig.features, ...saved.features });
 });
 
 // "log, item 4, verb: is empty." from a zod issue, for the admin form.
@@ -90,23 +91,4 @@ export async function saveSettingsSection(section: SettingsSection, value: unkno
 export async function refreshPublicPages() {
   revalidatePath("/", "layout");
   await purgeCdn();
-}
-
-// Purges Netlify's CDN cache for the whole site. It runs only when
-// NETLIFY_PURGE_API_TOKEN and SITE_ID are set (Netlify provides both to the
-// site's functions); elsewhere it does nothing.
-export async function purgeCdn() {
-  const token = process.env.NETLIFY_PURGE_API_TOKEN;
-  const siteId = process.env.SITE_ID;
-  if (!token || !siteId) return;
-  try {
-    const res = await fetch("https://api.netlify.com/api/v1/purge", {
-      method: "POST",
-      headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
-      body: JSON.stringify({ site_id: siteId }),
-    });
-    if (!res.ok) console.error(`Netlify cache purge failed: ${res.status} ${await res.text()}`);
-  } catch (err) {
-    console.error("Netlify cache purge failed.", err);
-  }
 }

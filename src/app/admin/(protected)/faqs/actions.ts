@@ -5,9 +5,9 @@ import { after } from "next/server";
 import { z } from "zod";
 
 import { requireAdmin } from "@/lib/auth";
+import { purgeCdn } from "@/lib/cdn";
 import { prisma } from "@/lib/prisma";
 import { syncRagIndexAfterResponse } from "@/lib/rag-sync-after";
-import { purgeCdn } from "@/lib/site-settings";
 
 export type FaqFormState = {
   error: string | null;

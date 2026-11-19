@@ -33,7 +33,7 @@ export default async function Icon({ id }: { id: Promise<string> }) {
           justifyContent: "center",
           borderRadius: px / 5,
           background: theme.primary,
-          color: "#fff",
+          color: theme.primaryForeground,
           fontSize: px * 0.7,
           fontWeight: 700,
         }}

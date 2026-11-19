@@ -1,19 +1,13 @@
-import { SettingsForm } from "@/components/admin/settings-form";
-import { getSite, readSettings } from "@/lib/site-settings";
-
 import { aboutFields } from "../fields";
+import { SectionForm } from "../section-form";
 
-export default async function AboutSettingsPage() {
-  const [site, stored] = await Promise.all([getSite(), readSettings()]);
+export default function AboutSettingsPage() {
   return (
-    <SettingsForm
-      key={JSON.stringify(stored.about ?? null)}
+    <SectionForm
       section="about"
       title="About page"
       description="The biography on /about. The journey and credentials there come from the Home and How I work settings."
       fields={aboutFields}
-      initial={site.about}
-      saved={Boolean(stored.about)}
     />
   );
 }

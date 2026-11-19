@@ -7,11 +7,11 @@ import { after } from "next/server";
 import { z } from "zod";
 
 import { requireAdmin } from "@/lib/auth";
+import { purgeCdn } from "@/lib/cdn";
 import { prisma } from "@/lib/prisma";
 import { saveDraftToDatabase } from "@/lib/profile-import/save";
 import { draftSchema } from "@/lib/profile-import/schema";
 import { syncRagIndexAfterResponse } from "@/lib/rag-sync-after";
-import { purgeCdn } from "@/lib/site-settings";
 
 // A full draft is well under 100 KB; anything far bigger is not one.
 const MAX_DRAFT_JSON = 200_000;

@@ -7,9 +7,9 @@ import { z } from "zod";
 
 import { blockDataSchemas, type BlockType } from "@/lib/blocks";
 import { requireAdmin } from "@/lib/auth";
+import { purgeCdn } from "@/lib/cdn";
 import { prisma } from "@/lib/prisma";
 import { syncRagIndexAfterResponse } from "@/lib/rag-sync-after";
-import { purgeCdn } from "@/lib/site-settings";
 import type { Prisma } from "@/generated/prisma/client";
 
 export type ExperienceFormState = {
