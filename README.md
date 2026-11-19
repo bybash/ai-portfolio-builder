@@ -1,48 +1,91 @@
 # AI Portfolio Builder
 
-> **This is a fork of [Mehmet Mutlu's AI Portfolio Builder](https://github.com/mutlumehmet/ai-portfolio-builder).** All the credit for the template goes to him: the portfolio, the admin, the AI layer, the profile import and the setup. This version keeps all of that and adds the changes below. The rest of this README is the original, with notes where this version differs.
->
-> **What this version adds**
->
-> * **A minimal look with dark mode.** Light borders, no hard shadows, serif headings, soft colour glows behind each page, and an optional `darkTheme` that follows the visitor's system setting, with a light and dark switch in the header. New themes: `gradient`, `gradientDark` and `clay`.
-> * **A pixel-art logo.** `person.logoPixel` draws a pixel mark from a few rows of `#` and a list of colours, extruded with an animation on load and on hover. The favicon, the app icons and the share image are generated from it.
-> * **A hero that streams like an AI chat.** A "Thinking…" status, the headline and intro word by word, an agent-style activity log with counting numbers, a "1 running" chip for the current role, and follow-up chips like suggested replies. The photo "prints" as the text grows, with no layout shift. The animation plays only on a full page load, and is skipped on back and forward and for reduced motion.
-> * **Section labels that answer like an agent**, with a thinking verb before each heading streams in.
-> * **FAQ as a chat.** Each question has a send button that streams the answer and a stop button that folds it away.
-> * **New pages and sections:** About (`/about`), How I work (`/how-i-work`), "Why the journey matters", systems and credentials, a stack order and hide list, and a terminal-style session block beside the logo.
-> * **Project header banners.** A project with `logo.svg` or `logo.png` (and an optional `logo-dark` variant) in its image folder opens with the logo on a soft gradient; others open with a cropped cover.
-> * **AI discovery.** `/llms.txt`, `/llms-full.txt` (the whole site as Markdown) and `/agents.md`, ProfilePage structured data, `robots.txt` and `sitemap.xml`.
-> * **Netlify support.** `netlify.toml`, CDN caching for public pages, and a fix for the HTML comment Netlify adds to `<head>`, which made React re-render the page.
-> * **Optional PostHog analytics**, off until `NEXT_PUBLIC_POSTHOG_KEY` is set, proxied through the site.
-> * **Settings in the admin.** `/admin/settings` edits the hero, the home sections, How I work, the stack, the About page, the pixel logo (a grid editor with a live preview), the session block, the footer and the feature flags. Saved values are stored in the database and override `site.config.ts`, which stays the default; each section can be reset to the file.
-> * **Accessibility:** a `<main>` landmark on every page.
+![AI Portfolio Builder: a complete portfolio website with an optional AI layer, shown in light and dark mode](docs/images/banner.png)
 
-![AI Portfolio Builder banner](docs/images/banner.png)
+**An open source portfolio website for developers and designers, with an optional AI layer that answers questions about your work from your own content.**
 
-**A complete portfolio website for developers and designers, plus an optional AI layer that answers questions about your work from your own content.**
+This is a fork of [Mehmet Mutlu's AI Portfolio Builder](https://github.com/mutlumehmet/ai-portfolio-builder). It keeps everything the original does and adds a new look, motion, a pixel logo with its own editor, and settings you can change in the browser. The sample persona, Odile Brandqvist, and everything about her are fictional.
 
-<p align="center"><a href="https://www.mehmetmutlu.dev"><img src="docs/images/see-it-live.png" alt="See it live: mehmetmutlu.dev" width="420"></a></p>
+* [What it does](#what-it-does): the template this fork is built on
+* [What this version adds](#what-this-version-adds): dark mode, the streaming hero, the pixel logo, settings in the admin and more
+* [Set it up](#set-it-up): one click, one command, or your coding agent
 
-*See it live* opens the portfolio this template was extracted from: same structure, AI chat and job-fit check, with its own content and colours.
+## What it does
 
-## Built with AI Portfolio Builder
+A complete portfolio site that works on its own, plus an AI layer you can switch on.
+
+* **Every page a portfolio needs.** Home, selected work with filters, project case studies built from content blocks (text, images, code, video and embeds), side projects, an experience timeline, a FAQ and a CV download. Phone, tablet and desktop layouts.
+* **An admin panel.** Edit projects, tags, FAQs and experience at `/admin`, without touching code. Coding agents can add and remove projects with a JSON file.
+* **Start from your LinkedIn, CV and GitHub.** The import drafts your profile, experience, projects and FAQs with your own AI key, and shows you a summary before anything is written. It never invents facts.
+* **An optional AI layer.** A chat that answers questions about your work, a job-fit check for recruiters, and a remote MCP server, all answering only from your own content through pgvector search. Works with OpenAI, Anthropic, Gemini, OpenRouter, Ollama or any OpenAI-compatible provider.
+* **Ready to deploy.** One-click deploy to Vercel with a free Neon database. The first build creates the tables, loads the sample content and builds the search index.
+* **The boring parts, done.** Admin sessions and login limits, per-IP rate limits on every AI endpoint, SEO and share images, colour themes and feature flags.
+
+## What this version adds
+
+### A hero that answers like an AI chat
+
+The home page opens like a chat answer: a "Thinking…" status, then the headline and intro stream in word by word while the photo "prints" from noise. An agent-style activity log counts its numbers up, a "1 running" chip shows the current role, and follow-up chips sit underneath like suggested replies. Nothing shifts as it grows. It plays only on a full page load; back and forward, and visitors who prefer reduced motion, see everything at once.
+
+![The hero streaming in: a thinking status, the headline word by word, the photo printing, then the activity log and the running chip](docs/images/hero.gif)
+
+Section headings on the home page answer the same way, with a thinking verb ("Retrieving…", "Recalling…") before the heading streams in.
+
+### Dark mode and a minimal look
+
+Light borders, soft colour glows behind each page, serif headings, and an optional dark palette that follows the visitor's system setting, with a switch in the header. New themes: `gradient` (the default), `gradientDark` and `clay`.
 
 <table>
 <tr>
-<td valign="top" width="50%">
-<a href="https://www.mehmetmutlu.dev"><img src="docs/images/showcase/mehmetmutlu.png" width="360" alt="Mehmet Mutlu's portfolio in the default neo-brutalist look, coral theme"></a><br>
-<b><a href="https://www.mehmetmutlu.dev">mehmetmutlu.dev</a></b>: Software engineer. The site this template came from, in the default neo-brutalist look.
-</td>
-<td valign="top" width="50%">
-<a href="https://portfolio.alaraakcasiz.com"><img src="docs/images/showcase/alaraakcasiz.png" width="360" alt="Alara Akçasız's portfolio, restyled with soft gradients and a serif headline"></a><br>
-<b><a href="https://portfolio.alaraakcasiz.com">portfolio.alaraakcasiz.com</a></b>: Head of Growth. Same template, restyled into a completely different look.
-</td>
+<td width="50%"><img src="docs/images/screens/home.png" alt="The home page in light mode"></td>
+<td width="50%"><img src="docs/images/screens/home-dark.png" alt="The home page in dark mode"></td>
 </tr>
 </table>
 
-Built yours? Open a pull request that adds a card here, with a 1280x800 screenshot in `docs/images/showcase/`.
+### A pixel logo, with an editor
 
-## Three ways to set it up
+A pixel-art mark drawn from a few rows of `#` and a list of colours that step diagonally across it, extruded with an animation on load and on hover. The favicon, the app icons and the share image are generated from it. Draw it in `/admin/settings/logo`: click or drag over the grid, pick the colours and the depth, and check the light, dark and header-size previews.
+
+<table>
+<tr>
+<td width="60%"><img src="docs/images/screens/logo-editor.png" alt="The pixel logo editor: a grid of pixels, width, height and depth fields, colour stops and three previews"></td>
+<td width="40%"><img src="docs/images/screens/share-image.png" alt="The share image generated from the pixel logo, with the name, headline and tagline"></td>
+</tr>
+</table>
+
+### Settings in the admin
+
+`/admin/settings` edits what used to live only in `site.config.ts`: the hero, the home sections (impact stats, why the journey matters, the journey), How I work, systems and credentials, the stack order, the About page, the session block beside the logo, the footer and the feature flags. Saved values are stored in the database and override the file, which stays the default; every section can be reset to it. Lists can be reordered, and every save is checked before it is stored.
+
+![The hero settings: fields for the headline and intro paragraphs, with move and remove buttons beside each row](docs/images/screens/admin-settings.png)
+
+### FAQ as a chat
+
+Each question has a play button. Press it and the answer streams in after a short "Accordioning…" status; the stop button folds it away again.
+
+<img src="docs/images/screens/faq.png" width="640" alt="The FAQ: the first answer streamed in under its question, with play buttons on the others">
+
+### About and How I work
+
+Two new pages. **How I work** (`/how-i-work`) lists working habits, each with the case study that proves it; the home page shows the first four. **About** (`/about`) has the biography, the career in steps, and certificates and education. The home page also gets "Why the journey matters", systems and credentials, and a stack you can order and filter.
+
+<table>
+<tr>
+<td width="50%"><img src="docs/images/screens/how-i-work.png" alt="The How I work page: habits with icons, each with a proof link"></td>
+<td width="50%"><img src="docs/images/screens/about.png" alt="The About page: biography, photo, career steps and credentials"></td>
+</tr>
+</table>
+
+### And also
+
+* **Project banners.** A project with `logo.svg` or `logo.png` (and an optional `logo-dark` variant) in `public/projects/<slug>/` opens with its logo on a soft gradient; others open with a cropped cover.
+* **A session block.** Beside the logo, terminal-style lines: name and version, the role, and a working directory that follows the page (`~/odile/projects`).
+* **For AI agents.** `/llms.txt` (a map of the site), `/llms-full.txt` (every page as one Markdown file) and `/agents.md` (how to use and cite them), ProfilePage structured data, `robots.txt` and `sitemap.xml`.
+* **Netlify.** A `netlify.toml`, 5-minute CDN caching for public pages with a purge on every admin save, and a fix for the HTML comment Netlify adds to `<head>`.
+* **PostHog analytics**, off until `NEXT_PUBLIC_POSTHOG_KEY` is set, proxied through the site, with `/admin` never tracked.
+* **Accessibility:** a `<main>` landmark on every page, and reduced motion respected everywhere.
+
+## Set it up
 
 ![Three ways to set it up, pick one: A, Deploy with Vercel with no code; B, npm run setup on your machine; C, ask your coding agent. All three can start from your LinkedIn, CV and GitHub](docs/images/three-ways.png)
 
@@ -52,7 +95,7 @@ All three can start from your LinkedIn profile, CV and GitHub: the draft is made
 
 [![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fbybash%2Fai-portfolio-builder&project-name=my-portfolio&repository-name=my-portfolio&env=AI_API_KEY%2CADMIN_PASSWORD%2CSESSION_SECRET&envDescription=An%20AI%20API%20key%20%28works%20with%20OpenAI%20by%20default%3B%20for%20another%20provider%20set%20AI_BASE_URL%20and%20CHAT_MODEL%20after%20deploy%29%2C%20a%20password%20for%20%2Fadmin%2C%20and%20any%20long%20random%20string%20to%20sign%20the%20admin%20session.&envLink=https%3A%2F%2Fgithub.com%2Fbybash%2Fai-portfolio-builder%23environment-variables&stores=%5B%7B%22type%22%3A%22integration%22%2C%22protocol%22%3A%22storage%22%2C%22integrationSlug%22%3A%22neon%22%2C%22productSlug%22%3A%22neon%22%7D%5D)
 
-Copies the repo to your GitHub, creates a free Neon database, asks for three values and deploys; the first build sets up the tables, sample content and search index. Then open `/admin/import` on your new site to draft your content from LinkedIn, a CV and GitHub. Details in [Deploy in one click](#deploy-in-one-click).
+Copies the repo to your GitHub, creates a free Neon database, asks for three values and deploys; the first build sets up the tables, sample content and search index. Then open `/admin/import` on your new site to draft your content from LinkedIn, a CV and GitHub. Details in [Deploy in one click](#deploy-in-one-click). Netlify works too: see [Deploy to Netlify](#deploy-to-netlify).
 
 <p align="center"><b>or</b></p>
 
@@ -81,56 +124,6 @@ time, fill everything in, load it, and start the site so I can check it.
 
 The agent reads your LinkedIn, CV and GitHub, shows you a draft, asks for anything missing, fills in the config, replaces the sample content with yours and loads it with the project scripts.
 
-## Take the tour
-
-Every page of the site, shown with the sample content: home, selected work, project pages, side projects, experience, FAQ, the admin panel and the AI layer.
-
-![Site tour: the home page, selected work, a project page, side projects, experience, the FAQ, the admin panel and the AI chat, one after another in a browser frame](docs/images/site-tour.gif)
-
-## How the AI layer answers
-
-The chat, the fit check and the MCP server answer only from your own content, through the same search. Details in [The AI layer](#the-ai-layer-optional).
-
-![How it works: your content goes into Postgres, rag:ingest turns it into embeddings, and the chat, the fit check and the MCP server answer only from the closest chunks](docs/images/how-it-works.gif)
-
-## Manage it with your agent
-
-Edit content in `/admin`, or let any coding agent add and remove projects with a JSON file. The search index re-syncs after every write. See [Make it yours](#make-it-yours).
-
-![A portfolio you can manage with your agent: the admin panel next to a terminal where a coding agent runs npm run project:upsert and the search index re-syncs](docs/images/manage-with-agent.png)
-
-## Looks right on every screen
-
-Every page has a phone, tablet and desktop layout, with a menu on phones, and the admin panel works on a phone too.
-
-![Looks right on every screen: the home page in a desktop browser, a project page on a tablet and the home page on a phone](docs/images/responsive.png)
-
-## Everything is ready
-
-The parts you would otherwise build yourself are already in place. Details in [Ready to deploy](#ready-to-deploy).
-
-![Everything is ready: one-click deploy, self-setup database, Postgres with pgvector, ready backend, admin panel, responsive layouts, security, rate limits, SEO and share images, colour themes, feature flags and an optional AI layer](docs/images/everything-ready.png)
-
-## Ready to deploy
-
-Built with Next.js 16, Prisma 7, Postgres with pgvector and OpenAI (or any OpenAI-compatible AI provider). Deploys to Vercel with a free Neon database. Ships with a fictional sample persona (Odile Brandqvist, a product engineer) so you can see every page working before you add your own content.
-
-Everything below is already done for you.
-
-| Built in | What you get |
-|---|---|
-| **One-click deploy** | The Vercel button copies the repo and creates a free Neon database for you. |
-| **Self-setup database** | The first deploy runs the migrations, loads the sample content and builds the search index. |
-| **Postgres with pgvector** | The first migration creates the `vector` extension, so there is nothing to enable by hand. |
-| **Admin panel** | Edit projects, tags, FAQs and experience in the browser at `/admin`. |
-| **Responsive** | Phone, tablet and desktop layouts for every page, a mobile menu, and an admin panel that works on a phone. |
-| **Security** | Every admin action checks the session, login attempts are limited, and AI inputs have length caps. |
-| **Rate limits** | Per-IP limits on every AI endpoint. |
-| **SEO and share images** | Page titles and descriptions, Open Graph tags, a generated share image for the site, and each project's cover as its share image. |
-| **Colour themes** | Ready-made [colour themes](#colour-themes), including pastels and neutrals, switched with one line. |
-| **Feature flags** | Switch any part off in `site.config.ts` or with an environment variable. |
-| **Optional AI layer** | Switch the chat, the fit check and the MCP server off and you have a plain portfolio. |
-
 ## What's inside
 
 The portfolio is a full site on its own. These are its pages, shown with the sample content.
@@ -138,42 +131,32 @@ The portfolio is a full site on its own. These are its pages, shown with the sam
 <table>
 <tr>
 <td valign="top" width="50%">
-<a href="src/app/page.tsx"><img src="docs/images/screens/home.png" width="360" alt="Home page: hero with headline, photo and buttons, then a row of impact numbers"></a><br>
-<b>Home</b>: your headline, intro, photo, impact numbers and career journey, then featured work, side projects and the FAQ. The text comes from <code>site.config.ts</code>; the projects and FAQs come from the database.
-</td>
-<td valign="top" width="50%">
-<a href="src/app/projects/page.tsx"><img src="docs/images/screens/work.png" width="360" alt="Selected work page: technology and industry filters above project cards with covers"></a><br>
+<a href="src/app/projects/page.tsx"><img src="docs/images/screens/work.png" width="400" alt="Selected work page: technology and industry filters above project cards with covers"></a><br>
 <b>Selected work</b> (<code>/projects</code>): every project as a card with its cover and tags, paid work first. Visitors filter by technology or industry.
 </td>
+<td valign="top" width="50%">
+<a href="src/app/projects/%5Bslug%5D/page.tsx"><img src="docs/images/screens/project-page-dark.png" width="400" alt="Project page in dark mode: a header image, role, years, tags and an overview"></a><br>
+<b>Project page</b> (<code>/projects/&lt;slug&gt;</code>): a case study built from content blocks. Each project is one JSON file in <code>content/projects/</code> or one entry in <code>/admin</code>.
+</td>
 </tr>
 <tr>
 <td valign="top" width="50%">
-<a href="src/app/projects/%5Bslug%5D/page.tsx"><img src="docs/images/screens/project-page.png" width="360" alt="Project page: role, years, tags, an overview and a large image"></a><br>
-<b>Project page</b> (<code>/projects/&lt;slug&gt;</code>): a case study built from content blocks (text, images, code, video and embeds). Each project is one JSON file in <code>content/projects/</code> or one entry in <code>/admin</code>.
-</td>
-<td valign="top" width="50%">
-<a href="src/app/side-projects/page.tsx"><img src="docs/images/screens/side-projects.png" width="360" alt="Side projects page: filters and project cards with code and live site icons"></a><br>
+<a href="src/app/side-projects/page.tsx"><img src="docs/images/screens/side-projects.png" width="400" alt="Side projects page: filters and project cards"></a><br>
 <b>Side projects</b> (<code>/side-projects</code>): the same list with personal projects first, each with links to its code and live site.
 </td>
-</tr>
-<tr>
 <td valign="top" width="50%">
-<a href="src/app/experience/page.tsx"><img src="docs/images/screens/experience.png" width="360" alt="Experience page: a vertical timeline of roles with dates, places and bullet points"></a><br>
+<a href="src/app/experience/page.tsx"><img src="docs/images/screens/experience.png" width="400" alt="Experience page: a timeline of roles with dates and places"></a><br>
 <b>Experience</b> (<code>/experience</code>): a timeline of your roles with dates, places and highlights, from <code>content/experience.json</code> or <code>/admin</code>.
 </td>
-<td valign="top" width="50%">
-<a href="content/faqs.json"><img src="docs/images/screens/faq.png" width="360" alt="FAQ section: a list of collapsible questions"></a><br>
-<b>FAQ</b>: questions visitors ask most, as an accordion on the home page. They come from <code>content/faqs.json</code> or <code>/admin</code>.
-</td>
 </tr>
 <tr>
 <td valign="top" width="50%">
-<a href="src/app/cv/route.ts"><img src="docs/images/screens/cv.png" width="360" alt="A dark call to action box with a Download CV button"></a><br>
-<b>CV download</b>: buttons in the header and on the home page. <code>/cv</code> serves <code>public/cv.pdf</code> with a dated file name.
+<a href="src/app/admin"><img src="docs/images/screens/admin.png" width="400" alt="Admin panel: a list of projects with edit, delete and reorder buttons"></a><br>
+<b>Admin panel</b> (<code>/admin</code>): a password protected editor for projects, tags, FAQs, experience and the site settings.
 </td>
 <td valign="top" width="50%">
-<a href="src/app/admin"><img src="docs/images/screens/admin.png" width="360" alt="Admin panel: a list of projects with edit, delete and reorder buttons"></a><br>
-<b>Admin panel</b> (<code>/admin</code>): a password protected editor for projects, tags, FAQs and experience. Add, edit, reorder and delete without touching code.
+<a href="src/app/admin/(protected)/settings/features/page.tsx"><img src="docs/images/screens/admin-features.png" width="400" alt="Feature settings: switches for the AI chat, the fit check, the file upload, the MCP server, the CV and canned answers"></a><br>
+<b>Features</b> (<code>/admin/settings/features</code>): switch the AI chat, the fit check, the MCP server, the CV download and canned answers on or off. <code>FEATURE_*</code> env vars still win.
 </td>
 </tr>
 </table>
@@ -191,7 +174,8 @@ Every page also has a phone layout, with a menu in place of the header links:
 | Part | Where it lives |
 |---|---|
 | Projects, experience, FAQs, tags | Postgres. Loaded from the JSON files in `content/` with `npm run db:seed`, or edited in `/admin`. |
-| Name, hero text, stats, journey, colour theme, contact links | `site.config.ts`, one file for everything person-specific. |
+| Name, contact links, SEO text, chat persona, colour theme | `site.config.ts`, one file for everything person-specific. |
+| Hero, home sections, How I work, stack, About, logo, footer, feature flags | `site.config.ts` as the default, overridden by anything saved in `/admin/settings`. |
 | Images | `public/`, with project images in `public/projects/<slug>/`. |
 | CV | `public/cv.pdf`. |
 
@@ -226,7 +210,7 @@ On the home page, visitors and recruiters get one panel with three tabs:
 
 ### How the AI layer works
 
-The [animation above](#how-the-ai-layer-answers) shows these steps.
+![How it works: your content goes into Postgres, rag:ingest turns it into embeddings, and the chat, the fit check and the MCP server answer only from the closest chunks](docs/images/how-it-works.gif)
 
 1. Your content (projects, experience, FAQs) lives in Postgres. You load it from the JSON files in `content/` or edit it in `/admin`.
 2. `npm run rag:ingest` splits that content into short chunks, turns each into an embedding (a list of 1536 numbers that captures its meaning) with your embedding provider (OpenAI by default), and stores them in a pgvector column.
@@ -238,7 +222,7 @@ Admin edits and the content scripts re-sync the index automatically. Only change
 
 ## Deploy in one click
 
-The [Deploy with Vercel](#ai-portfolio-builder) button at the top copies this repo to your GitHub account, creates a free Neon database for it, and asks for three values: your AI API key (`AI_API_KEY`, an OpenAI key by default; see [Choosing an AI provider](#choosing-an-ai-provider) for others), a password for `/admin`, and a long random string for `SESSION_SECRET` (`openssl rand -base64 32`). The first deploy then sets the database up by itself: it creates the tables, loads the sample content and builds the chat's search index (see [What happens on deploy](#what-happens-on-deploy)). You get a working site with the sample persona; then [make it yours](#make-it-yours) and follow the [cost steps](#cost-and-security) before you share the link.
+The [Deploy with Vercel](#set-it-up) button under Set it up copies this repo to your GitHub account, creates a free Neon database for it, and asks for three values: your AI API key (`AI_API_KEY`, an OpenAI key by default; see [Choosing an AI provider](#choosing-an-ai-provider) for others), a password for `/admin`, and a long random string for `SESSION_SECRET` (`openssl rand -base64 32`). The first deploy then sets the database up by itself: it creates the tables, loads the sample content and builds the chat's search index (see [What happens on deploy](#what-happens-on-deploy)). You get a working site with the sample persona; then [make it yours](#make-it-yours) and follow the [cost steps](#cost-and-security) before you share the link.
 
 ## Quick start
 
@@ -375,11 +359,9 @@ Where to run it:
 * On a deployed site, open `/admin/import`. It saves projects, experience and FAQs to the database, and gives you a `site.config.ts` snippet for your name and home page text to paste, commit and redeploy (a deployed site cannot change its own config). It uses the deployment's AI provider (`AI_API_KEY`).
 * A coding agent can run `npm run import -- --linkedin <url> --cv <path> --github <user> --out draft.json`, show you the summary, and after your yes write it with `npm run import -- --apply draft.json`.
 
-### Why neo-brutalism
+### The look
 
-*This version switches the hard shadows off for a minimal look (`--shadow-brutal` in `src/app/globals.css`); set them back there to return to the original style. The screenshots in this README show the original.*
-
-Most developer portfolios look the same: a dark hero, a gradient, a grid of cards, the look of a software services company. After a while nobody remembers any of them. Neo-brutalism (thick outlines, hard shadows, flat bold colours) still stands out wherever it is used, and it is easy to read, so it makes a portfolio that people notice and that still looks good. That is why this template uses it.
+This version uses a minimal look: light borders, no hard shadows, serif headings and soft colour glows. The original template is neo-brutalist (thick outlines, hard shadows, flat bold colours); to bring the hard shadows back, set `--shadow-brutal` and its `-sm` and `-lg` variants in `src/app/globals.css`.
 
 If you want a different look, you are not locked in. Open the project with your coding agent, give it screenshots or a design you like, and ask it to restyle the site. The colours live in `themes.ts`, the structure in `src/app/globals.css` and the components, so an agent can change either.
 
@@ -470,14 +452,8 @@ docker-compose.yml    local Postgres with pgvector
 
 Free and open source.
 
-![Free and open source: the mutlumehmet/ai-portfolio-builder repository with an MIT licence and a Use this template button, the clone and setup commands, and the stack: Next.js, Prisma, Postgres with pgvector and Tailwind CSS](docs/images/open-source.png)
-
 Code: [MIT](LICENSE). Sample content (everything in `content/`, the sample CV, avatar and project images in `public/`) is released under [CC0](https://creativecommons.org/publicdomain/zero/1.0/): use it freely while you test. The sample persona and every company and project in it are fictional; any resemblance to real people or businesses is a coincidence.
 
 ## About
 
-This fork is maintained by Hakan Baybaş. The template, and everything below, is by Mehmet Mutlu.
-
-[![Mehmet Mutlu: work that's shipped, at mehmetmutlu.dev](docs/images/site-banner.png)](https://www.mehmetmutlu.dev)
-
-Made by Mehmet Mutlu, [mehmetmutlu.dev](https://www.mehmetmutlu.dev). If it helps you, you can support it on [GitHub Sponsors](https://github.com/sponsors/mutlumehmet) or [Buy Me a Coffee](https://buymeacoffee.com/mutlumehmet).
+This fork is maintained by Hakan Baybaş. The original template is by Mehmet Mutlu, [mehmetmutlu.dev](https://www.mehmetmutlu.dev). If it helps you, you can support it on [GitHub Sponsors](https://github.com/sponsors/mutlumehmet) or [Buy Me a Coffee](https://buymeacoffee.com/mutlumehmet).
