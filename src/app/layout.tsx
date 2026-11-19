@@ -87,6 +87,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     >
       <head>
         <style>{themeCss}</style>
+        {/* Points AI tools reading any page to the site as plain text. */}
+        <link rel="alternate" type="text/markdown" href="/llms-full.txt" title="Everything on this site as Markdown" />
+        <link rel="alternate" type="text/plain" href="/llms.txt" title="Site map for AI tools (llms.txt)" />
         {darkTheme && <script dangerouslySetInnerHTML={{ __html: darkModeScript }} />}
         <script dangerouslySetInnerHTML={{ __html: motionScript }} />
       </head>

@@ -17,6 +17,7 @@ import { FaqChat } from "@/components/faq-chat";
 import { ProjectCoverImage } from "@/components/project-cover-image";
 import { RichText } from "@/components/rich-text";
 import { SiteFooter } from "@/components/site-footer";
+import { PersonJsonLd } from "@/components/person-json-ld";
 import { SectionLabel } from "@/components/section-label";
 import { SiteHeader } from "@/components/site-header";
 import { TraitRows } from "@/components/trait-rows";
@@ -62,6 +63,7 @@ export default async function Home() {
 
   return (
     <div className="flex flex-1 flex-col text-foreground">
+      <PersonJsonLd />
       <SiteHeader />
       <main className="mx-auto flex w-full max-w-5xl flex-1 flex-col px-6">
         <section className="grid grid-cols-1 gap-8 py-16 md:grid-cols-[1fr_320px] md:gap-x-10 md:py-20">
