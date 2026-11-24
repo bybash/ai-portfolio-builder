@@ -25,6 +25,8 @@ Next.js 16 (App Router, Turbopack), React 19, TypeScript, Tailwind CSS 4, shadcn
 * `src/lib/rag.ts`: retrieval and prompts. `src/lib/rag-sync.ts`: incremental index sync.
 * `src/lib/auth.ts`: admin session; every admin server action must call `requireAdmin()` first.
 * `src/lib/rate-limit.ts`: per-IP limits; every public AI route calls `aiRequestAllowed()`.
+* `src/lib/posts.ts`: public reads of blog posts. Everything outside `/admin` goes through it, so a draft never leaks. Post text is Markdown, rendered by `src/components/post-body.tsx`. The editor is `src/components/admin/post-editor.tsx`.
+* `src/app/api/mcp/admin/route.ts`: the private MCP server for drafts. Never add a tool that publishes, deletes or changes a live post.
 * `content/` and `prisma/seed.ts`: sample content and its loader.
 
 ## Checks before a pull request

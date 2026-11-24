@@ -78,6 +78,18 @@ async function collectChunks(prisma: PrismaClient): Promise<PendingChunk[]> {
   for (const faq of faqs) {
     chunks.push({ sourceType: "faq", sourceId: faq.id, content: `Q: ${faq.question}\nA: ${faq.answer}` });
   }
+
+  // Published posts only. Paragraph by paragraph, like project content.
+  const posts = await prisma.post.findMany({ where: { status: "published" } });
+  for (const post of posts) {
+    chunks.push({ sourceType: "post", sourceId: post.id, content: `Blog post: ${post.title}. ${post.summary}` });
+    for (const text of post.body.replace(/^(`{3,}|~{3,})[\s\S]*?^\1/gm, "").split(/\n\s*\n/)) {
+      const trimmed = text.trim();
+      if (trimmed && !trimmed.startsWith("#")) {
+        chunks.push({ sourceType: "post", sourceId: post.id, content: `${post.title}: ${trimmed}` });
+      }
+    }
+  }
   return chunks;
 }
 

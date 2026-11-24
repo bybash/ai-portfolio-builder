@@ -10,6 +10,7 @@ const LABELS: Record<EditableFeature, { label: string; help: string }> = {
   parseJd: { label: "File upload in the fit check", help: "PDF, .docx or .txt job descriptions. Needs the fit check." },
   mcp: { label: "MCP server", help: "The MCP tab and /api/mcp." },
   cv: { label: "CV download", help: "The CV buttons and /cv." },
+  blog: { label: "Blog", help: "The /blog pages, the RSS feed and the Blog link. Posts are written in Posts, also while this is off." },
   easterEggs: { label: "Canned answers", help: "The easterEggs answers in site.config.ts, checked before the AI." },
 };
 

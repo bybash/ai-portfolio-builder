@@ -305,6 +305,23 @@ export const siteConfig = {
     ],
   },
 
+  blog: {
+    heading: "Blog",
+    intro: "Notes on building software that keeps working, with or without a signal.",
+    // Shown under a post once its LinkedIn link is saved.
+    discuss: {
+      heading: "What do you think?",
+      text: "Questions, disagreements and your own experience are all welcome.",
+    },
+    // The look of AI covers in /admin/posts, added to every cover's prompt.
+    coverStyle:
+      "Richly detailed 16-bit pixel art, like a still from an atmospheric adventure game. Cinematic wide shot with foreground, middle ground and background, one clear light source and deep shadows. Crisp, consistent pixel size.",
+    // Extra rules for AI drafts (and for agents using the private MCP server).
+    // Add anything that must never be mentioned, such as an employer's internals.
+    draftRules:
+      "First person, plain and direct, with short paragraphs. Never mention confidential details of an employer's or client's work, such as internal names, customers, colleagues, metrics or unreleased plans, unless they already appear in the CONTEXT.",
+  },
+
   experience: {
     intro: "Nine years in product engineering, after three in civil engineering. Most of it spent on software that has to keep working when the signal does not.",
   },
@@ -395,6 +412,9 @@ export const siteConfig = {
     cv: true,
     easterEggs: false,
     rateLimit: true,
+    // The /blog pages, feed and header link. Posts are written in /admin/posts,
+    // also while this is off: switch it on once the first one is ready.
+    blog: false,
   },
 
   rateLimit: {

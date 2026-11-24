@@ -12,6 +12,7 @@
 //                       use the AI_* values. EMBEDDING_API_KEY on its own means
 //                       OpenAI embeddings (chat with Claude, embeddings with OpenAI).
 //   EMBEDDING_MODEL     default text-embedding-3-small; "none" switches embeddings off
+//   IMAGE_MODEL         optional; draws post covers, with OpenRouter only
 //   EMBEDDING_DIMENSIONS optional; sent as `dimensions` for models that can
 //                       shorten their output to the 1536 the database stores
 
@@ -55,6 +56,17 @@ export function embeddingsConfigured() {
   // Anthropic's OpenAI-compatible API has no embeddings endpoint.
   if (/anthropic\.com/i.test(e.baseURL)) return false;
   return Boolean(e.apiKey || e.baseURL);
+}
+
+/** The model that draws post covers. "none" switches covers off. */
+export function imageModel() {
+  return env("IMAGE_MODEL") || "bytedance-seed/seedream-5-5";
+}
+
+/** True when post covers can be drawn: OpenRouter only, through its image API. */
+export function imagesConfigured() {
+  const ai = aiSettings();
+  return Boolean(ai.apiKey) && /openrouter\.ai/i.test(ai.baseURL) && !/^(none|off)$/i.test(imageModel());
 }
 
 export const chatModel = aiSettings().model;
