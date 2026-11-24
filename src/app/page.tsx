@@ -18,6 +18,7 @@ import { ProjectCoverImage } from "@/components/project-cover-image";
 import { RichText } from "@/components/rich-text";
 import { SiteFooter } from "@/components/site-footer";
 import { PersonJsonLd } from "@/components/person-json-ld";
+import { ScrollCue } from "@/components/scroll-cue";
 import { SectionLabel } from "@/components/section-label";
 import { SiteHeader } from "@/components/site-header";
 import { TraitRows } from "@/components/trait-rows";
@@ -69,7 +70,7 @@ export default async function Home() {
       <PersonJsonLd />
       <SiteHeader />
       <main className="mx-auto flex w-full max-w-5xl flex-1 flex-col px-6">
-        <section className="grid grid-cols-1 gap-8 py-16 md:grid-cols-[1fr_320px] md:gap-x-10 md:py-20">
+        <section className="relative grid grid-cols-1 gap-8 py-16 md:min-h-[calc(100svh-6.5rem)] md:grid-cols-[1fr_300px] md:content-center md:gap-x-10 md:gap-y-5 md:pt-10 md:pb-16">
           <div className="relative w-full justify-self-center text-center md:justify-self-start md:text-left">
             {/* The "thinking" status the hero shows before its text streams in (motion.tsx). */}
             <p
@@ -89,14 +90,14 @@ export default async function Home() {
                 ))}
               </div>
             )}
-            <h1 data-motion="hero-title" className="mx-auto max-w-xl text-4xl leading-[1.04] sm:text-5xl sm:leading-[1.02] font-semibold tracking-tight text-balance md:mx-0 md:max-w-none md:text-6xl">
+            <h1 data-motion="hero-title" className="mx-auto max-w-xl text-4xl leading-[1.04] sm:text-5xl sm:leading-[1.02] font-semibold tracking-tight text-balance md:mx-0 md:max-w-none md:text-[3.25rem] md:leading-[1.04]">
               {hero.headlineBefore}{" "}
               <span data-motion="hero-highlight" className="inline-block rounded-md px-2 text-accent-foreground">
                 {hero.headlineHighlight}
               </span>{" "}
               {hero.headlineAfter}
             </h1>
-            <div data-motion="hero-stream" className="mx-auto mt-6 flex max-w-md flex-col gap-3 text-lg text-muted-foreground md:mx-0 md:max-w-none">
+            <div data-motion="hero-stream" className="mx-auto mt-6 flex max-w-md flex-col gap-3 text-lg text-muted-foreground md:mx-0 md:max-w-none md:text-base">
               {hero.paragraphs.map((p) => (
                 <p key={p}>
                   <RichText text={p} />
@@ -104,7 +105,7 @@ export default async function Home() {
               ))}
             </div>
             {hero.log.length > 0 && (
-              <ul data-motion="hero-log" className="mx-auto mt-5 flex max-w-md flex-col gap-1.5 text-left text-sm md:mx-0 md:max-w-none">
+              <ul data-motion="hero-log" className="mx-auto mt-5 flex max-w-md flex-col gap-1 text-left text-sm md:mx-0 md:max-w-none">
                 {hero.log.map((line) => (
                   <li key={line.verb} className="flex gap-2">
                     <span aria-hidden className="text-muted-foreground/60">⎿</span>
@@ -130,7 +131,7 @@ export default async function Home() {
               <Link
                 data-motion="hero-item"
                 href={hero.running.href}
-                className="mt-6 inline-flex items-center gap-2 rounded-full border border-border bg-card/60 py-1 pr-3 pl-2.5 text-xs text-muted-foreground transition-colors hover:border-primary/40 hover:text-foreground"
+                className="mt-5 inline-flex items-center gap-2 rounded-full border border-border bg-card/60 py-1 pr-3 pl-2.5 text-xs text-muted-foreground transition-colors hover:border-primary/40 hover:text-foreground"
               >
                 <span aria-hidden className="running-spinner text-sm leading-none text-primary" />
                 <span className="font-medium whitespace-nowrap text-foreground">1 running</span>
@@ -200,6 +201,7 @@ export default async function Home() {
               );
             })}
           </nav>
+          <ScrollCue />
         </section>
 
         {stats.length > 0 && (
@@ -273,7 +275,7 @@ export default async function Home() {
 
             {traits.length > HOME_TRAITS && (
               <div data-reveal className="mt-8 flex justify-center">
-                <Button variant="neutral" size="lg" asChild>
+                <Button pixel variant="neutral" size="lg" asChild>
                   <Link href="/how-i-work">See how I work →</Link>
                 </Button>
               </div>
@@ -401,7 +403,7 @@ export default async function Home() {
           </div>
 
           <div data-reveal className="mt-10 flex justify-center">
-            <Button variant="neutral" size="lg" asChild>
+            <Button pixel variant="neutral" size="lg" asChild>
               <Link href="/projects">See all work →</Link>
             </Button>
           </div>
@@ -417,7 +419,7 @@ export default async function Home() {
               </p>
             </CardContent>
             <CardContent className="px-6">
-              <Button size="lg" asChild>
+              <Button pixel size="lg" asChild>
                 <a href="/cv">Download CV →</a>
               </Button>
             </CardContent>
@@ -464,7 +466,7 @@ export default async function Home() {
             </div>
 
             <div className="mt-10 flex justify-center">
-              <Button variant="neutral" size="lg" asChild>
+              <Button pixel variant="neutral" size="lg" asChild>
                 <Link href="/side-projects">See all side projects →</Link>
               </Button>
             </div>

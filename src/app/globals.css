@@ -443,3 +443,90 @@ html.motion-skip [data-pixel-logo] [data-layer] {
     radial-gradient(ellipse 40% 90% at 95% 85%, #28286a, transparent 70%),
     #101e3e;
 }
+
+/* Pixel buttons (<Button pixel>): square corners with one pixel notched out,
+   an outline drawn by four shadows, and a stepped edge below and to the right,
+   like the extruded logo. Hover presses it down one pixel, a click all the
+   way. --px is the size of one pixel. */
+.btn-pixel {
+  --px: 3px;
+  --px-face: var(--primary);
+  --px-edge: color-mix(in oklab, var(--primary) 45%, #000);
+  --px-depth: color-mix(in oklab, var(--primary) 60%, #000);
+  --px-lift: 2;
+  margin: var(--px);
+  background: var(--px-face);
+  box-shadow:
+    0 calc(var(--px) * -1) 0 0 var(--px-edge),
+    0 var(--px) 0 0 var(--px-edge),
+    calc(var(--px) * -1) 0 0 0 var(--px-edge),
+    var(--px) 0 0 0 var(--px-edge),
+    inset calc(var(--px) * -1) calc(var(--px) * -1) 0 0 color-mix(in oklab, var(--px-face) 80%, #000),
+    inset var(--px) var(--px) 0 0 color-mix(in oklab, var(--px-face) 82%, #fff),
+    calc(var(--px) * var(--px-lift)) calc(var(--px) * (var(--px-lift) + 1)) 0 0 var(--px-depth),
+    calc(var(--px) * (var(--px-lift) + 1)) calc(var(--px) * var(--px-lift)) 0 0 var(--px-depth);
+  transition:
+    transform 90ms steps(2),
+    box-shadow 90ms steps(2);
+}
+.btn-pixel.btn-pixel:hover {
+  --px-lift: 1;
+  transform: translate(var(--px), var(--px));
+}
+.btn-pixel.btn-pixel:active {
+  --px-lift: 0;
+  transform: translate(calc(var(--px) * 2), calc(var(--px) * 2));
+}
+.btn-pixel-neutral {
+  --px-face: var(--card);
+  --px-edge: var(--foreground);
+  --px-depth: var(--foreground);
+}
+.btn-pixel:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: calc(var(--px) * 3);
+}
+@media (prefers-reduced-motion: reduce) {
+  .btn-pixel {
+    transition: none;
+  }
+}
+
+/* The hero's "scroll" hint (scroll-cue.tsx): fades in once the hero has
+   played (motion.tsx adds .hero-done), nudges down now and then, and fades
+   out once the page scrolls. */
+@keyframes scroll-cue-nudge {
+  0%, 80%, 100% { transform: translateY(0); }
+  90% { transform: translateY(4px); }
+}
+.scroll-cue {
+  transition: opacity 600ms, color 150ms;
+}
+/* While the hero is still playing, the hint stays out of the way. */
+html.motion:not(.motion-skip):not(.hero-done) .scroll-cue {
+  opacity: 0;
+  pointer-events: none;
+}
+.scroll-cue-arrow {
+  animation: scroll-cue-nudge 2.5s ease-in-out 4s infinite;
+}
+.scroll-cue[data-hidden] {
+  opacity: 0;
+  pointer-events: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .scroll-cue-arrow { animation: none; }
+}
+
+/* While the hero plays on a fresh home-page load, the header shows only the
+   logo (.hero-playing, set in layout.tsx and cleared by motion.tsx). If the
+   script never starts, the fail-safe brings the links back. */
+[data-header-extra] {
+  transition: opacity 600ms ease-out;
+}
+html.hero-playing [data-header-extra] {
+  opacity: 0;
+}
+html.hero-playing:not(.motion-ready) [data-header-extra] {
+  animation: motion-failsafe 0.3s 4s forwards;
+}

@@ -18,15 +18,16 @@ const nextConfig: NextConfig = {
     ];
   },
   // Public pages render per request (so the build needs no database). On
-  // Netlify, its CDN keeps each one for 5 minutes and refreshes it in the
-  // background, so visitors don't wait on the database. No public page reads
-  // cookies, so a cached copy is the same for everyone. Admin, API and the
-  // analytics proxy are never cached. Other hosts ignore this header.
+  // Vercel and Netlify, the CDN keeps each one for 5 minutes and refreshes it
+  // in the background, so visitors don't wait on the database. No public page
+  // reads cookies, so a cached copy is the same for everyone. Admin, API and
+  // the analytics proxy are never cached. Each host reads only its own header.
   async headers() {
     return [
       {
         source: "/((?!admin|api|ingest|_next).*)",
         headers: [
+          { key: "Vercel-CDN-Cache-Control", value: "public, s-maxage=300, stale-while-revalidate=604800" },
           { key: "Netlify-CDN-Cache-Control", value: "public, s-maxage=300, stale-while-revalidate=604800, durable" },
         ],
       },

@@ -65,8 +65,8 @@ export function SiteHeaderNav({ active, back, name, initials, mark, session, sho
   );
 
   return (
-    <div className="mx-auto w-full max-w-5xl px-6">
-      <nav className="flex items-center justify-between border-b border-border py-6">
+    <header className="mx-auto w-full max-w-5xl px-6">
+      <nav className="flex items-center justify-between py-6">
         {/* The logo with a terminal-style session block: name and version, the
             current role, and a working directory that follows the page. */}
         <Link href="/" className="flex min-w-0 items-center gap-3" onMouseEnter={replayLogo}>
@@ -91,7 +91,7 @@ export function SiteHeaderNav({ active, back, name, initials, mark, session, sho
           </div>
         ) : (
           <>
-            <div className="hidden items-center gap-6 md:flex">
+            <div data-header-extra className="hidden items-center gap-6 md:flex">
               {NAV_LINKS.map((link) => (
                 <Link
                   key={link.key}
@@ -103,7 +103,7 @@ export function SiteHeaderNav({ active, back, name, initials, mark, session, sho
                 </Link>
               ))}
               {showCv && (
-                <Button asChild>
+                <Button pixel asChild>
                   <a href="/cv">Download CV</a>
                 </Button>
               )}
@@ -111,7 +111,7 @@ export function SiteHeaderNav({ active, back, name, initials, mark, session, sho
               {iconButtons}
             </div>
 
-            <div className="flex items-center gap-1 md:hidden">
+            <div data-header-extra className="flex items-center gap-1 md:hidden">
               {iconButtons}
               <button
                 type="button"
@@ -139,13 +139,13 @@ export function SiteHeaderNav({ active, back, name, initials, mark, session, sho
             </Link>
           ))}
           {showCv && (
-            <Button asChild className="self-start">
+            <Button pixel asChild className="self-start">
               <a href="/cv">Download CV</a>
             </Button>
           )}
         </div>
       )}
-    </div>
+    </header>
   );
 }
 

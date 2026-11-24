@@ -99,7 +99,7 @@ export default async function ProjectPage({
           {(project.liveUrl || project.repoUrl) && (
             <div className="mb-10 flex flex-wrap gap-3">
               {project.liveUrl && (
-                <Button asChild variant="neutral">
+                <Button pixel asChild variant="neutral">
                   <a href={project.liveUrl} target="_blank" rel="noopener noreferrer">
                     Visit project
                     <ExternalLink />
@@ -107,7 +107,7 @@ export default async function ProjectPage({
                 </Button>
               )}
               {project.repoUrl && (
-                <Button asChild variant="neutral">
+                <Button pixel asChild variant="neutral">
                   <a href={project.repoUrl} target="_blank" rel="noopener noreferrer">
                     <GithubIcon className="size-4" />
                     View on GitHub
