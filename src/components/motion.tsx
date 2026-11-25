@@ -80,15 +80,14 @@ function streamLabel(el: HTMLElement) {
 
   later(() => {
     el.dataset.state = "streaming";
+    // The content comes in as the heading starts typing, not after it.
+    releaseWaiting(el);
     let i = 0;
     const step = () => {
       i += 1;
       el.innerHTML = `<span aria-hidden="true">${escapeHtml(text.slice(0, i))}</span><span aria-hidden="true" class="label-caret"></span>`;
       if (i < text.length) later(step, CHAR_MS);
-      else {
-        releaseWaiting(el);
-        later(() => finishLabel(el), CARET_MS);
-      }
+      else later(() => finishLabel(el), CARET_MS);
     };
     step();
   }, THINK_MS);
@@ -101,7 +100,7 @@ function finishLabel(el: HTMLElement) {
   releaseWaiting(el);
 }
 
-// The section's content waits for its heading, like a reply after its title.
+// The section's content waits for its heading to start, like a reply after its title.
 function releaseWaiting(el: HTMLElement) {
   el.dataset.typed = "";
   const waiting = waitingOnLabel.get(el) ?? [];
@@ -153,8 +152,8 @@ function revealContent(el: Element) {
 // "generates" instead: noisy and blurred, sharpening step by step).
 const HERO_THINK_VERBS = ["Thinking", "Pondering", "Composing"];
 const HERO_THINK_MS = 1300;
-const TITLE_WORD_MS = 60;
-const BODY_WORD_MS = 15;
+const TITLE_WORD_MS = 90;
+const BODY_WORD_MS = 55;
 const PHOTO_MS = 2800;
 
 function makeCaret() {
@@ -238,11 +237,18 @@ function printPhoto(photo: HTMLElement, finalHeight: number): PhotoRun {
   const noise = gen?.querySelector<HTMLElement>(".photo-gen-noise");
   const scan = gen?.querySelector<HTMLElement>(".photo-gen-scan");
   const img = photo.querySelector("img");
-  if (img) img.style.transition = "filter 0.3s";
 
   // The image and its colour wash keep the final height, so nothing rescales.
   // Their own inline styles (next/image sets some) are restored afterwards.
   const saved = layers.map((el) => el.style.cssText);
+  // Fully blurred before it shows, so the first frame is never sharp (set after
+  // saving the styles above, so they restore clean). The transition comes after,
+  // for the steps while it prints.
+  if (img) {
+    img.style.filter = "blur(18px) saturate(0.4)";
+    void img.offsetHeight;
+    img.style.transition = "filter 0.3s";
+  }
   layers.forEach((el) => {
     el.style.height = `${finalHeight}px`;
     el.style.bottom = "auto";
@@ -308,6 +314,7 @@ function generatePhoto(finalHeight: number): PhotoRun {
   const noise = gen?.querySelector<HTMLElement>(".photo-gen-noise");
   const scan = gen?.querySelector<HTMLElement>(".photo-gen-scan");
 
+  if (img) img.style.filter = "blur(26px) saturate(0.4)";
   photo.style.opacity = "1";
   if (gen) gen.style.display = "block";
   const state = { p: 0 };
@@ -359,36 +366,60 @@ function lockLines(container: HTMLElement, words: HTMLElement[]) {
   };
 }
 
-// The activity log under the intro: lines appear one by one like an agent's
-// tool calls, and their numbers count up.
-const LOG_LINE_MS = 320;
-
-function playLog(lines: HTMLElement[], onReveal: (el: HTMLElement) => void, done: () => void) {
-  let i = 0;
-  const step = () => {
-    const line = lines[i];
-    line.style.visibility = "";
-    onReveal(line);
-    animate(line, { opacity: [0, 1], x: [-6, 0], duration: 300, ease: "out(2)" });
+// The activity log under the intro: its lines fade in together, and their
+// numbers count up.
+function showLog(lines: HTMLElement[]) {
+  if (!lines.length) return;
+  lines.forEach((line) => (line.style.visibility = ""));
+  animate(lines, { opacity: [0, 1], y: [8, 0], duration: 600, ease: EASE });
+  lines.forEach((line) =>
     line.querySelectorAll<HTMLElement>("[data-count]").forEach((num) => {
       const target = Number(num.dataset.count);
       const counter = { n: 0 };
       num.textContent = "0";
       animate(counter, {
         n: target,
-        duration: 650,
+        duration: 900,
         ease: "out(3)",
         onUpdate: () => {
           num.textContent = Math.round(counter.n).toLocaleString("en-GB");
         },
       });
-    });
-    i += 1;
-    if (i < lines.length) later(step, LOG_LINE_MS);
-    else later(done, LOG_LINE_MS);
+    }),
+  );
+}
+
+// While the hero plays on a fresh load of the home page, the header shows only
+// the logo (layout.tsx adds .hero-playing before the first paint; CSS hides
+// [data-header-extra]). Its links come back when the hero finishes, or at once
+// when the visitor scrolls, presses a key, touches the screen or points at
+// the header.
+function showHeader() {
+  document.documentElement.classList.remove("hero-playing");
+}
+
+function quietHeader() {
+  const header = document.querySelector("header");
+  const onScroll = () => {
+    if (window.scrollY > 10) show();
   };
-  if (lines.length) step();
-  else done();
+  const show = () => {
+    showHeader();
+    stop();
+  };
+  const stop = () => {
+    window.removeEventListener("scroll", onScroll);
+    window.removeEventListener("keydown", show);
+    window.removeEventListener("touchstart", show);
+    header?.removeEventListener("pointerenter", show);
+    header?.removeEventListener("focusin", show);
+  };
+  window.addEventListener("scroll", onScroll, { passive: true });
+  window.addEventListener("keydown", show);
+  window.addEventListener("touchstart", show, { passive: true });
+  header?.addEventListener("pointerenter", show);
+  header?.addEventListener("focusin", show);
+  return stop;
 }
 
 // `onDone` runs once the hero has finished, so the sections below wait their turn.
@@ -421,6 +452,7 @@ function playHero(onDone: () => void) {
   title.style.opacity = "1";
   if (body) body.style.opacity = "1";
 
+  const stopQuietHeader = quietHeader();
   const caret = makeCaret();
   const thinking = playThinking(document.querySelector<HTMLElement>("[data-motion='hero-thinking']"));
   const photo = generatePhoto(finalPhotoHeight);
@@ -436,24 +468,24 @@ function playHero(onDone: () => void) {
       });
       streamWords(bodyWords, BODY_WORD_MS, caret, photo.follow, () => {
         caret.remove();
-        playLog(logLines, photo.follow, () => {
-          items.forEach((el) => (el.style.visibility = ""));
-          animate(items, {
-            opacity: [0, 1],
-            y: [16, 0],
-            duration: 700,
-            delay: stagger(120),
-            ease: EASE,
-          });
-          later(() => photo.release(), 800);
-          later(onDone, 300);
-          thinking.fade();
-        });
+        // The activity log, the chips and the header's links fade in together
+        // once the text is in.
+        showLog(logLines);
+        showHeader();
+        items.forEach((el) => (el.style.visibility = ""));
+        animate(items, { opacity: [0, 1], y: [8, 0], duration: 600, ease: EASE });
+        photo.release();
+        later(onDone, 300);
+        // The "scroll" hint under the hero (scroll-cue.tsx) waits for this.
+        later(() => document.documentElement.classList.add("hero-done"), 900);
+        thinking.fade();
       });
     });
   }, HERO_THINK_MS);
 
   return () => {
+    stopQuietHeader();
+    showHeader();
     photo.release(true);
     unlockLines();
     caret.remove();
@@ -502,6 +534,7 @@ export function Motion() {
       if (openedMidPage() || (pathname === "/" && !landed)) {
         cameBack = false;
         root.classList.add("motion-skip");
+        showHeader();
         return;
       }
       root.classList.remove("motion-skip");

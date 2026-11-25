@@ -11,7 +11,7 @@ import { SocialIcon } from "@/components/social-icon";
 import { ThemeToggle } from "@/components/theme-toggle";
 
 export type SiteHeaderProps = {
-  active?: "about" | "work" | "how" | "experience";
+  active?: "about" | "work" | "how" | "experience" | "blog";
   back?: { href: string; label: string };
 };
 
@@ -20,6 +20,7 @@ type SiteHeaderNavProps = SiteHeaderProps & {
   initials: string;
   mark: LogoMark;
   session: { version: string; versionTitle: string; subtitle: string; home: string };
+  showBlog: boolean;
   showCv: boolean;
   showThemeToggle: boolean;
   socials: { label: string; href: string }[];
@@ -32,6 +33,7 @@ const NAV_LINKS = [
   { key: "work", href: "/projects", label: "What", title: "Work" },
   { key: "how", href: "/how-i-work", label: "How", title: "How I work" },
   { key: "experience", href: "/experience", label: "When", title: "Experience" },
+  { key: "blog", href: "/blog", label: "Blog", title: "Writing" },
 ] as const;
 
 // Icon buttons on the right of the header: social links, then the light / dark switch.
@@ -41,10 +43,12 @@ const ICON_BUTTON =
 const navLinkClass = (isActive: boolean) =>
   `text-base font-medium ${isActive ? "text-foreground" : "text-muted-foreground hover:text-foreground"}`;
 
-export function SiteHeaderNav({ active, back, name, initials, mark, session, showCv, showThemeToggle, socials }: SiteHeaderNavProps) {
+export function SiteHeaderNav({ active, back, name, initials, mark, session, showBlog, showCv, showThemeToggle, socials }: SiteHeaderNavProps) {
   const [menuOpen, setMenuOpen] = useState(false);
   const pathname = usePathname();
   const cwd = pathname && pathname !== "/" ? `${session.home}${pathname}` : session.home;
+
+  const navLinks = NAV_LINKS.filter((link) => link.key !== "blog" || showBlog);
 
   const iconButtons = (
     <div className="flex items-center gap-1">
@@ -65,8 +69,8 @@ export function SiteHeaderNav({ active, back, name, initials, mark, session, sho
   );
 
   return (
-    <div className="mx-auto w-full max-w-5xl px-6">
-      <nav className="flex items-center justify-between border-b border-border py-6">
+    <header className="mx-auto w-full max-w-5xl px-6">
+      <nav className="flex items-center justify-between py-6">
         {/* The logo with a terminal-style session block: name and version, the
             current role, and a working directory that follows the page. */}
         <Link href="/" className="flex min-w-0 items-center gap-3" onMouseEnter={replayLogo}>
@@ -91,8 +95,8 @@ export function SiteHeaderNav({ active, back, name, initials, mark, session, sho
           </div>
         ) : (
           <>
-            <div className="hidden items-center gap-6 md:flex">
-              {NAV_LINKS.map((link) => (
+            <div data-header-extra className="hidden items-center gap-6 lg:flex">
+              {navLinks.map((link) => (
                 <Link
                   key={link.key}
                   href={link.href}
@@ -103,7 +107,7 @@ export function SiteHeaderNav({ active, back, name, initials, mark, session, sho
                 </Link>
               ))}
               {showCv && (
-                <Button asChild>
+                <Button pixel asChild>
                   <a href="/cv">Download CV</a>
                 </Button>
               )}
@@ -111,7 +115,7 @@ export function SiteHeaderNav({ active, back, name, initials, mark, session, sho
               {iconButtons}
             </div>
 
-            <div className="flex items-center gap-1 md:hidden">
+            <div data-header-extra className="flex items-center gap-1 lg:hidden">
               {iconButtons}
               <button
                 type="button"
@@ -127,8 +131,8 @@ export function SiteHeaderNav({ active, back, name, initials, mark, session, sho
       </nav>
 
       {!back && menuOpen && (
-        <div className="flex flex-col gap-4 border-b border-border py-6 md:hidden">
-          {NAV_LINKS.map((link) => (
+        <div className="flex flex-col gap-4 border-b border-border py-6 lg:hidden">
+          {navLinks.map((link) => (
             <Link
               key={link.key}
               href={link.href}
@@ -139,13 +143,13 @@ export function SiteHeaderNav({ active, back, name, initials, mark, session, sho
             </Link>
           ))}
           {showCv && (
-            <Button asChild className="self-start">
+            <Button pixel asChild className="self-start">
               <a href="/cv">Download CV</a>
             </Button>
           )}
         </div>
       )}
-    </div>
+    </header>
   );
 }
 

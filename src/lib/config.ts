@@ -16,6 +16,7 @@ export const FEATURE_ENV: Record<FeatureName, string> = {
   cv: "FEATURE_CV",
   easterEggs: "FEATURE_EASTER_EGGS",
   rateLimit: "FEATURE_RATE_LIMIT",
+  blog: "FEATURE_BLOG",
 };
 
 export function envFlag(name: string): boolean | undefined {

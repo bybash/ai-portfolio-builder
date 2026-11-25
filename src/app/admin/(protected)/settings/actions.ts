@@ -1,6 +1,7 @@
 "use server";
 
 import { requireAdmin } from "@/lib/auth";
+import { syncRagIndexAfterResponse } from "@/lib/rag-sync-after";
 import { readSettings, saveSettingsSection, type SaveResult } from "@/lib/site-settings";
 import type { SettingsSection } from "@/lib/site-settings-schema";
 
@@ -9,6 +10,8 @@ import type { SettingsSection } from "@/lib/site-settings-schema";
 
 export async function saveSettings(section: SettingsSection, value: unknown): Promise<SaveResult> {
   await requireAdmin();
+  // The blog flag decides whether posts are in the chat's index.
+  if (section === "features") syncRagIndexAfterResponse();
   if (section === "home" && value && typeof value === "object") {
     const stored = (await readSettings()).home ?? {};
     return saveSettingsSection("home", { ...stored, ...value });
@@ -20,6 +23,7 @@ export async function saveSettings(section: SettingsSection, value: unknown): Pr
 // for `home`, only `keys`.
 export async function resetSettings(section: SettingsSection, keys?: string[]): Promise<SaveResult> {
   await requireAdmin();
+  if (section === "features") syncRagIndexAfterResponse();
   if (section === "home" && keys?.length) {
     const rest: Record<string, unknown> = { ...(await readSettings()).home };
     for (const key of keys) delete rest[key];

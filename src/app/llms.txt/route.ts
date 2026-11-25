@@ -1,4 +1,5 @@
 import { siteUrl } from "@/lib/config";
+import { publishedPosts } from "@/lib/posts";
 import { prisma } from "@/lib/prisma";
 import { getFeatures, getSite } from "@/lib/site-settings";
 
@@ -11,6 +12,7 @@ const year = (d: Date | null) => (d ? String(d.getUTCFullYear()) : "now");
 export async function GET() {
   const [site, features] = await Promise.all([getSite(), getFeatures()]);
   const { person, seo, contact, socials } = site;
+  const posts = await publishedPosts();
   const [projects, roles] = await Promise.all([
     prisma.project.findMany({ orderBy: [{ category: "asc" }, { order: "asc" }], select: { slug: true, title: true, summary: true } }),
     prisma.experience.findMany({ orderBy: [{ order: "asc" }, { id: "asc" }], select: { title: true, company: true, startDate: true, endDate: true } }),
@@ -39,6 +41,7 @@ export async function GET() {
     "## Projects",
     ...projects.map((p) => `- [${p.title}](${siteUrl}/projects/${p.slug}): ${p.summary}`),
     "",
+    ...(posts.length ? ["## Blog", ...posts.map((p) => `- [${p.title}](${siteUrl}/blog/${p.slug}): ${p.summary}`), ""] : []),
     "## Experience",
     ...roles.map((r) => `- ${r.title}, ${r.company} (${year(r.startDate)} to ${year(r.endDate)})`),
     "",

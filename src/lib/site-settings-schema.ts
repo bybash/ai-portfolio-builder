@@ -60,7 +60,7 @@ export const footerSchema = z.object({ builtWith: text });
 // Flags that are safe to switch from the admin. `admin` and `rateLimit` stay in
 // the file and env, so a wrong click cannot lock the owner out or remove the
 // limits. Env vars (FEATURE_*) still win over these.
-export const EDITABLE_FEATURES = ["chat", "fitCheck", "parseJd", "mcp", "cv", "easterEggs"] as const;
+export const EDITABLE_FEATURES = ["chat", "fitCheck", "parseJd", "mcp", "cv", "blog", "easterEggs"] as const;
 export type EditableFeature = (typeof EDITABLE_FEATURES)[number];
 export const featuresSchema = z.object(
   Object.fromEntries(EDITABLE_FEATURES.map((k) => [k, z.boolean()])) as Record<EditableFeature, z.ZodBoolean>,

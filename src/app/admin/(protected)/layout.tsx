@@ -14,7 +14,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   const site = await getSite();
   return (
     <div className="flex flex-1 flex-col bg-background text-foreground">
-      <div className="mx-auto w-full max-w-5xl px-6">
+      <div className="mx-auto w-full max-w-6xl px-6">
         <nav className="flex flex-col gap-4 border-b border-border py-6 sm:flex-row sm:items-center sm:justify-between">
           <Link href="/admin/projects" className="flex items-center gap-2 text-xl font-semibold">
             <Logo initials={siteConfig.person.initials} mark={logoMark(site)} className="size-8" />
@@ -23,6 +23,9 @@ export default async function AdminLayout({ children }: { children: React.ReactN
           <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
             <Link href="/admin/projects" className="text-sm font-bold hover:underline">
               Projects
+            </Link>
+            <Link href="/admin/posts" className="text-sm font-bold hover:underline">
+              Posts
             </Link>
             <Link href="/admin/tags" className="text-sm font-bold hover:underline">
               Tags
@@ -50,7 +53,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
           </div>
         </nav>
       </div>
-      <div className="mx-auto flex w-full max-w-5xl flex-1 flex-col px-6">
+      <div className="mx-auto flex w-full max-w-6xl flex-1 flex-col px-6">
         <div className="flex-1 py-10">{children}</div>
       </div>
     </div>

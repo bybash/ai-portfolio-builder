@@ -39,6 +39,11 @@ export async function SiteFooter() {
               <Link href="/experience" className="text-sm font-normal text-muted-foreground hover:text-foreground hover:underline">
                 Experience
               </Link>
+              {features.blog && (
+                <Link href="/blog" className="text-sm font-normal text-muted-foreground hover:text-foreground hover:underline">
+                  Blog
+                </Link>
+              )}
               <a href="/agents.md" className="text-sm font-normal text-muted-foreground hover:text-foreground hover:underline">
                 For AI agents
               </a>

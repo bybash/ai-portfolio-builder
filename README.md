@@ -4,10 +4,10 @@
 
 **An open source portfolio website for developers and designers, with an optional AI layer that answers questions about your work from your own content.**
 
-This is a fork of [Mehmet Mutlu's AI Portfolio Builder](https://github.com/mutlumehmet/ai-portfolio-builder). It keeps everything the original does and adds a new look, motion, a pixel logo with its own editor, and settings you can change in the browser. The sample persona, Odile Brandqvist, and everything about her are fictional.
+This is a fork of [Mehmet Mutlu's AI Portfolio Builder](https://github.com/mutlumehmet/ai-portfolio-builder). It keeps everything the original does and adds a new look, motion, a pixel logo with its own editor, a blog, and settings you can change in the browser. The sample persona, Odile Brandqvist, and everything about her are fictional.
 
 * [What it does](#what-it-does): the template this fork is built on
-* [What this version adds](#what-this-version-adds): dark mode, the streaming hero, the pixel logo, settings in the admin and more
+* [What this version adds](#what-this-version-adds): dark mode, the streaming hero, the pixel logo, settings in the admin, a blog and more
 * [Set it up](#set-it-up): one click, one command, or your coding agent
 
 ## What it does
@@ -76,12 +76,33 @@ Two new pages. **How I work** (`/how-i-work`) lists working habits, each with th
 </tr>
 </table>
 
+### A blog, with a real editor
+
+Off until you switch it on (`blog` in [Feature flags](#feature-flags)), so you can write first.
+
+* **Writing** (`/admin/posts`): a WYSIWYG editor (Milkdown) that stores Markdown, with a `/` menu, tables, code, images and YouTube videos. Drafts, publish and unpublish, tags, a live preview card, and ⌘S to save.
+* **Images** from your computer, pasted or dropped in. They are resized and stored in your database, so there is no file storage to set up. A post without a cover gets a pixel pattern in your theme's colours.
+* **For readers:** `/blog`, post pages, RSS, a share image per post, canonical links and `BlogPosting` data. Published posts also go into the sitemap, `llms.txt` and the chat's knowledge.
+* **LinkedIn:** copy the article formatted for LinkedIn's editor, with its images one by one. Save the article's link and the post ends with a "Comment on LinkedIn" box. (LinkedIn has no API for publishing articles, so this part is copy and paste.)
+* **AI drafts and covers** (optional): a draft from your own notes and your site's content, which marks what it doesn't know as `[TODO]`; a post with a `[TODO]` can't be published. Covers work with OpenRouter. Both spend your provider's credit, only when you click. They can take a minute: on Netlify, which stops a function sooner than Vercel, a slow one may be cut off after the provider has charged for it. A cover on another site is shown on the blog, but the share image then uses the pixel pattern.
+* **From a file:** `npm run post:draft -- post.md` saves a Markdown file as a draft.
+* **From Claude Code** (optional): a private MCP server that writes drafts. It has no tool to publish, so a person always reads the post first. See [Write posts from Claude Code](#write-posts-from-claude-code).
+
+<table>
+<tr>
+<td width="50%"><img src="docs/images/screens/blog.png" alt="The blog: the latest post across the page, others below, with pixel covers"></td>
+<td width="50%"><img src="docs/images/screens/post-editor.png" alt="The post editor: title, summary and formatted text, with details and a preview card on the right"></td>
+</tr>
+</table>
+
 ### And also
 
+* **Pixel buttons** that match the logo, and a full-screen hero on desktop with a scroll hint, readable streaming and a photo that starts blurred. While the hero plays, the header shows only the logo.
+* **Email links that always do something.** When no mail app opens, the address is copied and a note says so.
 * **Project banners.** A project with `logo.svg` or `logo.png` (and an optional `logo-dark` variant) in `public/projects/<slug>/` opens with its logo on a soft gradient; others open with a cropped cover.
 * **A session block.** Beside the logo, terminal-style lines: name and version, the role, and a working directory that follows the page (`~/odile/projects`).
 * **For AI agents.** `/llms.txt` (a map of the site), `/llms-full.txt` (every page as one Markdown file) and `/agents.md` (how to use and cite them), ProfilePage structured data, `robots.txt` and `sitemap.xml`.
-* **Netlify.** A `netlify.toml`, 5-minute CDN caching for public pages with a purge on every admin save, and a fix for the HTML comment Netlify adds to `<head>`.
+* **Vercel and Netlify.** 5-minute CDN caching for public pages on both, one minute for anything that lists posts. For Netlify, also a `netlify.toml`, a purge on every admin save, and a fix for the HTML comment Netlify adds to `<head>`.
 * **PostHog analytics**, off until `NEXT_PUBLIC_POSTHOG_KEY` is set, proxied through the site, with `/admin` never tracked.
 * **Accessibility:** a `<main>` landmark on every page, and reduced motion respected everywhere.
 
@@ -296,6 +317,8 @@ Without `DATABASE_URL` the steps are skipped and only the site is built. `npm ru
 | `CHAT_MODEL` | No | Defaults to `gpt-4.1-mini`. Set a model your provider offers. |
 | `EMBEDDING_API_KEY`, `EMBEDDING_BASE_URL` | No | A separate provider for embeddings. Both fall back to the `AI_*` values; `EMBEDDING_API_KEY` on its own means OpenAI. |
 | `EMBEDDING_MODEL` | No | Defaults to `text-embedding-3-small` (1536 dimensions). `none` switches embeddings, and with them the chat, fit check and MCP server, off. |
+| `IMAGE_MODEL` | No | Draws blog covers, with OpenRouter only (`AI_BASE_URL="https://openrouter.ai/api/v1"`). Defaults to `bytedance-seed/seedream-5-5`, $0.02 per cover in November 2026. `none` switches covers off. |
+| `ADMIN_MCP_TOKEN` | No | Switches on the private MCP server for blog drafts. At least 32 characters (`openssl rand -hex 32`). |
 | `EMBEDDING_DIMENSIONS` | No | Sent as `dimensions`, for an embedding model that can shorten its output to 1536. |
 | `NEXT_PUBLIC_SITE_URL` | No | Public URL; overrides `url` in `site.config.ts`. |
 | `FEATURE_*` | No | Feature flag overrides, see below. |
@@ -383,6 +406,7 @@ Set in `site.config.ts` under `features`, or per deployment with environment var
 | `mcp` | `FEATURE_MCP` | on | MCP tab hidden, `/api/mcp` returns 404 |
 | `admin` | `FEATURE_ADMIN` | on | `/admin` returns 404 and every admin action refuses to run |
 | `cv` | `FEATURE_CV` | on | CV buttons hidden, `/cv` returns 404 |
+| `blog` | `FEATURE_BLOG` | off | `/blog`, post pages and the feed return 404, the Blog link is hidden; posts can still be written in the admin |
 | `easterEggs` | `FEATURE_EASTER_EGGS` | off | Canned answers in `easterEggs` are ignored |
 | `rateLimit` | `FEATURE_RATE_LIMIT` | on | No per-IP limits (not recommended in production) |
 
@@ -418,12 +442,22 @@ claude mcp add --transport http your-portfolio https://your-domain/api/mcp
 
 Other MCP clients that support remote HTTP servers take the same URL. MCP calls share the per-IP rate limits of the site.
 
+### Write posts from Claude Code
+
+A second, private MCP server at `/api/mcp/admin` lets Claude Code write blog drafts: `list_posts`, `get_post`, `create_draft`, `update_draft` and, with OpenRouter, `make_cover`. On purpose there is no tool to publish, unpublish, delete or change a live post: you do that in `/admin/posts`. It is off until `ADMIN_MCP_TOKEN` is set.
+
+```bash
+claude mcp add --transport http my-blog https://your-domain/api/mcp/admin --header "Authorization: Bearer YOUR_TOKEN"
+```
+
+Keep the token as private as your admin password. An agent can read a web page or file that tries to steer it, and can pick up confidential details from its session, so read every draft before you publish. Put your own limits in `blog.draftRules` in `site.config.ts`.
+
 ## Project structure
 
 ```
 site.config.ts        everything person-specific, plus feature flags
 content/              sample projects, experience and FAQs (JSON)
-prisma/               schema, single init migration, seed (loads content/)
+prisma/               schema, migrations, seed (loads content/)
 scripts/              setup, profile import, ingest, project upsert and delete, cover measuring
 src/app/              pages, admin, API routes (chat, fit-check, parse-jd, mcp), /cv
 src/components/       UI, including shadcn/ui primitives in ui/

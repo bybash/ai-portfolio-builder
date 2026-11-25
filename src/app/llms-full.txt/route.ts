@@ -1,5 +1,6 @@
 import { blocksToMarkdown, roleDates } from "@/lib/agent-text";
 import { siteUrl } from "@/lib/config";
+import { publishedPosts } from "@/lib/posts";
 import { prisma } from "@/lib/prisma";
 import { getFeatures, getSite } from "@/lib/site-settings";
 
@@ -11,6 +12,7 @@ export const dynamic = "force-dynamic";
 export async function GET() {
   const [site, features] = await Promise.all([getSite(), getFeatures()]);
   const { person, seo, contact, socials, about, home } = site;
+  const posts = await publishedPosts();
   const [projects, roles, faqs] = await Promise.all([
     prisma.project.findMany({
       orderBy: [{ category: "asc" }, { order: "asc" }],
@@ -66,6 +68,10 @@ export async function GET() {
           .join("\n\n");
       })
       .join("\n\n"),
+
+    ...(posts.length
+      ? ["## Blog", posts.map((p) => [`### ${p.title}`, `${siteUrl}/blog/${p.slug}`, p.summary, p.body].join("\n\n")).join("\n\n")]
+      : []),
 
     "## Stack",
     home.stackOrder.join(", "),

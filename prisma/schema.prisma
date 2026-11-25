@@ -132,6 +132,41 @@ model Faq {
   @@index([order])
 }
 
+enum PostStatus {
+  draft
+  published
+}
+
+// Blog posts. `body` is Markdown, so one source renders on the site and
+// converts to the formats other channels accept. Drafts are only ever shown
+// in /admin.
+model Post {
+  id            String     @id @default(cuid())
+  slug          String     @unique
+  title         String
+  summary       String
+  body          String
+  coverImageUrl String?
+  tags          String[]   @default([])
+  status        PostStatus @default(draft)
+  // Set the first time the post is published, and kept if it is unpublished.
+  publishedAt   DateTime?
+  // Where the same article lives elsewhere, filled in by hand after posting it.
+  linkedinUrl   String?
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+
+  @@index([status, publishedAt])
+}
+
+// Images uploaded in /admin for blog posts, served from /media/<id>.<ext>.
+model Media {
+  id        String   @id @default(uuid())
+  type      String
+  data      Bytes
+  createdAt DateTime @default(now())
+}
+
 // The RAG search index (chat, fit check, MCP). Derived from
 // Project/Experience/Faq content by scripts/ingest.ts; never hand-edited.
 // Not tied to any one source table (sourceId is nullable) so a future

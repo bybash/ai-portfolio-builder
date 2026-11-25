@@ -2,6 +2,7 @@ import { z } from "zod";
 
 import { chatJson, chatText, embedTexts } from "@/lib/ai-client";
 import { siteConfig } from "@/lib/config";
+import { blogEnabled } from "@/lib/blog-flag";
 import { checkEasterEgg } from "@/lib/easter-eggs";
 import { prisma } from "@/lib/prisma";
 
@@ -30,11 +31,13 @@ export async function retrieveRelevantChunks(
   limit = 10
 ): Promise<RetrievedChunk[]> {
   const vectorLiteral = toVectorLiteral(queryEmbedding);
+  // Posts already in the index stay out of answers while the blog is off.
+  const blogOn = await blogEnabled(prisma);
 
   return prisma.$queryRaw<RetrievedChunk[]>`
     SELECT content, "sourceType"
     FROM "Chunk"
-    WHERE embedding IS NOT NULL
+    WHERE embedding IS NOT NULL AND (${blogOn} OR "sourceType" <> 'post')
     ORDER BY embedding <=> ${vectorLiteral}::vector
     LIMIT ${limit}
   `;
@@ -52,6 +55,7 @@ async function retrieveFitCheckContext(
   projectLimit = 10
 ): Promise<RetrievedChunk[]> {
   const vectorLiteral = toVectorLiteral(queryEmbedding);
+  const blogOn = await blogEnabled(prisma);
 
   const [faqChunks, topChunks] = await Promise.all([
     prisma.$queryRaw<RetrievedChunk[]>`
@@ -62,7 +66,7 @@ async function retrieveFitCheckContext(
     prisma.$queryRaw<RetrievedChunk[]>`
       SELECT content, "sourceType"
       FROM "Chunk"
-      WHERE "sourceType" != 'faq' AND embedding IS NOT NULL
+      WHERE "sourceType" != 'faq' AND embedding IS NOT NULL AND (${blogOn} OR "sourceType" <> 'post')
       ORDER BY embedding <=> ${vectorLiteral}::vector
       LIMIT ${projectLimit}
     `,

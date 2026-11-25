@@ -1,6 +1,7 @@
 import type { MetadataRoute } from "next";
 
 import { siteUrl } from "@/lib/config";
+import { publishedPosts } from "@/lib/posts";
 import { prisma } from "@/lib/prisma";
 import { getFeatures } from "@/lib/site-settings";
 
@@ -12,8 +13,11 @@ const PAGES = ["", "/about", "/projects", "/how-i-work", "/experience", "/side-p
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const features = await getFeatures();
   const projects = await prisma.project.findMany({ select: { slug: true, updatedAt: true } });
+  const posts = await publishedPosts();
   return [
     ...PAGES.map((path) => ({ url: `${siteUrl}${path}` })),
+    ...(features.blog ? [{ url: `${siteUrl}/blog` }] : []),
+    ...posts.map((p) => ({ url: `${siteUrl}/blog/${p.slug}`, lastModified: p.updatedAt })),
     ...(features.cv ? [{ url: `${siteUrl}/cv.pdf` }] : []),
     // Plain-text versions for AI tools (see /agents.md).
     { url: `${siteUrl}/llms.txt` },

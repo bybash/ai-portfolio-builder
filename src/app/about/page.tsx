@@ -40,12 +40,12 @@ export default async function AboutPage() {
             </div>
             <div className="mt-8 flex flex-wrap gap-4">
               {features.cv && (
-                <Button size="lg" asChild>
+                <Button pixel size="lg" asChild>
                   <a href="/cv">Download CV →</a>
                 </Button>
               )}
               {contact.email && (
-                <Button size="lg" variant="neutral" asChild>
+                <Button pixel size="lg" variant="neutral" asChild>
                   <a href={`mailto:${contact.email}`}>Get in touch</a>
                 </Button>
               )}

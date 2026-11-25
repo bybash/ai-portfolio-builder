@@ -18,18 +18,28 @@ const nextConfig: NextConfig = {
     ];
   },
   // Public pages render per request (so the build needs no database). On
-  // Netlify, its CDN keeps each one for 5 minutes and refreshes it in the
-  // background, so visitors don't wait on the database. No public page reads
-  // cookies, so a cached copy is the same for everyone. Admin, API and the
-  // analytics proxy are never cached. Other hosts ignore this header.
+  // Vercel and Netlify, the CDN keeps each one for 5 minutes and refreshes it
+  // in the background, so visitors don't wait on the database. No public page
+  // reads cookies, so a cached copy is the same for everyone. Admin, API and
+  // the analytics proxy are never cached; /media sets its own caching. Each host reads only its own header.
   async headers() {
     return [
       {
-        source: "/((?!admin|api|ingest|_next).*)",
+        source: "/((?!admin|api|ingest|media|_next|blog|llms|sitemap).*)",
         headers: [
+          { key: "Vercel-CDN-Cache-Control", value: "public, s-maxage=300, stale-while-revalidate=604800" },
           { key: "Netlify-CDN-Cache-Control", value: "public, s-maxage=300, stale-while-revalidate=604800, durable" },
         ],
       },
+      // Anything that lists posts is kept for a minute and never served stale
+      // after that, so an unpublished post is gone soon on every host.
+      ...["/blog/:path*", "/llms.txt", "/llms-full.txt", "/sitemap.xml"].map((source) => ({
+        source,
+        headers: [
+          { key: "Vercel-CDN-Cache-Control", value: "public, s-maxage=60" },
+          { key: "Netlify-CDN-Cache-Control", value: "public, s-maxage=60" },
+        ],
+      })),
     ];
   },
   // PostHog's API paths end in a slash; don't redirect them.

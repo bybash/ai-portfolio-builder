@@ -8,6 +8,7 @@ import {
   EMBEDDING_COLUMN_DIMENSIONS,
   embeddingsConfigured,
   embeddingSettings,
+  imageModel,
 } from "@/lib/ai-env";
 import { parseJsonObject } from "@/lib/json-output";
 
@@ -100,4 +101,30 @@ export async function embedTexts(input: string[]): Promise<number[][]> {
     );
   }
   return vectors;
+}
+
+type ImageResponse = { data?: { b64_json?: string }[]; usage?: { cost?: number } };
+
+/**
+ * Draws one image through OpenRouter's image API (not part of the OpenAI
+ * SDK's shape). Check imagesConfigured() first.
+ */
+export async function drawImage(prompt: string, aspectRatio: string) {
+  const { apiKey, baseURL } = aiSettings();
+  const request = (extras: Record<string, string>) =>
+    fetch(`${baseURL.replace(/\/+$/, "")}/images`, {
+      method: "POST",
+      headers: { authorization: `Bearer ${apiKey}`, "content-type": "application/json" },
+      body: JSON.stringify({ model: imageModel(), prompt, aspect_ratio: aspectRatio, ...extras }),
+      signal: AbortSignal.timeout(90_000),
+    });
+  let response = await request({ resolution: "1K", output_format: "jpeg" });
+  // Not every model takes every option.
+  if (response.status === 400) response = await request({});
+  if (!response.ok) throw new Error(`Image request failed: ${response.status} ${(await response.text()).slice(0, 300)}`);
+  const result = (await response.json()) as ImageResponse;
+  return {
+    data: new Uint8Array(Buffer.from(result.data?.[0]?.b64_json ?? "", "base64")),
+    cost: result.usage?.cost ?? null,
+  };
 }

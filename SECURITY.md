@@ -21,7 +21,7 @@ Also:
 
 * Use a long random `ADMIN_PASSWORD` and `SESSION_SECRET`. The app refuses the example values in production.
 * Turn off features you do not use (`FEATURE_MCP=false`, for example). A disabled endpoint returns 404.
-* Keep `AI_API_KEY` (or `OPENAI_API_KEY`), any `EMBEDDING_API_KEY` and `DATABASE_URL` only in your host's environment settings, never in the repository.
+* Keep `AI_API_KEY` (or `OPENAI_API_KEY`), any `EMBEDDING_API_KEY`, `DATABASE_URL` and `ADMIN_MCP_TOKEN` only in your host's environment settings, never in the repository.
 
 ## What the template already does
 
@@ -30,6 +30,10 @@ Also:
 * Inputs are capped: 2,000 characters per question, 8,000 per job description, 5 MB per upload.
 * Prompts treat visitor text as data, refuse off-topic requests, and the fit-check output is validated with zod.
 * Embedded iframes are sandboxed, with an optional host allowlist in `site.config.ts`.
+
+* Uploaded images are admin only, capped at 4 MB, checked by their first bytes, and never SVG. Anyone with an image's address can load it, also before its post is published; addresses are random.
+* Post text is Markdown; raw HTML is shown as text and unsafe link schemes are dropped.
+* The private MCP server (`/api/mcp/admin`) needs a token of at least 32 characters and can only write drafts. It has no tool to publish, delete or change live posts.
 
 ## Known limits
 

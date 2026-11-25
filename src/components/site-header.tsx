@@ -14,6 +14,7 @@ export async function SiteHeader(props: SiteHeaderProps) {
       initials={site.person.initials}
       mark={logoMark(site)}
       session={site.person.session}
+      showBlog={features.blog}
       showCv={features.cv}
       showThemeToggle={siteConfig.darkTheme !== null}
       socials={socialLinks.filter((l) => l.label !== "X")}

@@ -24,7 +24,13 @@ const buttonVariants = cva(
         lg: "h-12 px-8 text-base",
         icon: "size-10",
       },
+      // Pixel-art look: stepped corners and a stepped 3D edge, like the logo
+      // (.btn-pixel in globals.css).
+      pixel: {
+        true: "btn-pixel rounded-none border-0",
+      },
     },
+    compoundVariants: [{ variant: "neutral", pixel: true, class: "btn-pixel-neutral" }],
     defaultVariants: {
       variant: "default",
       size: "default",
@@ -36,6 +42,7 @@ function Button({
   className,
   variant,
   size,
+  pixel,
   asChild = false,
   ...props
 }: React.ComponentProps<"button"> &
@@ -47,7 +54,7 @@ function Button({
   return (
     <Comp
       data-slot="button"
-      className={cn(buttonVariants({ variant, size, className }))}
+      className={cn(buttonVariants({ variant, size, pixel, className }))}
       {...props}
     />
   );

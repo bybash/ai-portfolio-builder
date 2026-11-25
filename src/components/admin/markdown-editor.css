@@ -1,0 +1,93 @@
+/* Milkdown Crepe in the site's own colours and fonts, light and dark, with
+   text set the way the blog page sets it. */
+.post-editor .milkdown {
+  --crepe-color-background: var(--card);
+  --crepe-color-on-background: var(--foreground);
+  --crepe-color-surface: var(--card);
+  --crepe-color-surface-low: var(--muted);
+  --crepe-color-on-surface: var(--foreground);
+  --crepe-color-on-surface-variant: var(--muted-foreground);
+  --crepe-color-outline: var(--muted-foreground);
+  --crepe-color-primary: var(--link);
+  --crepe-color-secondary: var(--muted);
+  --crepe-color-on-secondary: var(--foreground);
+  --crepe-color-inverse: var(--foreground);
+  --crepe-color-on-inverse: var(--background);
+  --crepe-color-inline-code: var(--foreground);
+  --crepe-color-error: var(--destructive);
+  --crepe-color-hover: var(--muted);
+  --crepe-color-selected: color-mix(in srgb, var(--link) 20%, transparent);
+  --crepe-color-inline-area: var(--muted);
+  --crepe-base-font-size: 16px;
+  --crepe-font-title: var(--font-playfair), serif;
+  --crepe-font-default: var(--font-inter), sans-serif;
+  --crepe-font-code: var(--font-geist-mono), monospace;
+  --crepe-shadow-1: 0 1px 4px rgb(0 0 0 / 0.15);
+  --crepe-shadow-2: 0 4px 16px rgb(0 0 0 / 0.18);
+  border-radius: inherit;
+}
+.post-editor .milkdown .ProseMirror {
+  min-height: 60vh;
+  padding: 1.5rem 4.5rem 6rem;
+}
+.post-editor .milkdown .ProseMirror h1,
+.post-editor .milkdown .ProseMirror h2 {
+  font-size: 1.875rem;
+  line-height: 1.25;
+  font-weight: 600;
+}
+.post-editor .milkdown .ProseMirror h3 {
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+.post-editor .milkdown .ProseMirror a {
+  color: var(--link);
+  text-decoration: underline;
+}
+.post-editor .milkdown .ProseMirror img {
+  max-width: 100%;
+  border-radius: 0.5rem;
+}
+@media (max-width: 640px) {
+  .post-editor .milkdown .ProseMirror {
+    padding: 1.25rem 1.5rem 5rem;
+  }
+}
+/* Floating menus sit above the sticky action bar (z-20 in post-editor.tsx). */
+.post-editor .milkdown :is(.milkdown-slash-menu, .milkdown-toolbar, .milkdown-link-preview, .milkdown-link-edit) {
+  z-index: 30;
+}
+/* A compact "/" menu, so it fits above or below the cursor on a laptop. */
+.post-editor .milkdown .milkdown-slash-menu .menu-groups {
+  max-height: min(260px, 35svh);
+  padding-block: 4px 8px;
+}
+.post-editor .milkdown .milkdown-slash-menu .menu-groups .menu-group li {
+  padding-block: 8px;
+}
+.post-editor .milkdown .milkdown-slash-menu .menu-groups .menu-group h6 {
+  padding-block: 8px 4px;
+}
+.post-editor .milkdown .youtube-preview {
+  max-width: 24rem;
+  margin: 0.5rem 0 1rem;
+}
+/* The toolbar sticks just under the action bar, with tighter groups. */
+.post-editor .milkdown .milkdown-top-bar {
+  top: 65px;
+}
+.post-editor .milkdown .milkdown-top-bar .top-bar-divider {
+  margin: 10px 4px;
+}
+.post-editor .milkdown .milkdown-top-bar .top-bar-item {
+  margin-inline: 2px;
+}
+.post-editor .milkdown .milkdown-top-bar .top-bar-heading-button .top-bar-heading-label {
+  min-width: 72px;
+}
+@media (max-width: 640px) {
+  /* Several rows here, and the action bar is taller: scroll with the text. */
+  .post-editor .milkdown .milkdown-top-bar {
+    position: static;
+  }
+}

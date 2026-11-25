@@ -3,6 +3,7 @@ import { Geist_Mono, Inter, Playfair_Display } from "next/font/google";
 
 import { siteConfig, siteUrl } from "@/lib/config";
 
+import { MailtoFallback } from "@/components/mailto-fallback";
 import { Motion } from "@/components/motion";
 import { readableOn } from "@/lib/contrast";
 import "./globals.css";
@@ -79,7 +80,7 @@ const darkModeScript = `try{var t=localStorage.getItem("theme");if(t==="dark"||(
 // comments (and the stray text around them) from <head>: Netlify's free plan
 // inserts one there, and React would treat it as a hydration mismatch and
 // re-render the page from scratch, dropping the "dark" and "motion" classes.
-const motionScript = `try{for(var n=document.head.firstChild;n;){var x=n.nextSibling;if(n.nodeType===8||n.nodeType===3)n.remove();n=x}}catch(e){}try{if(!matchMedia("(prefers-reduced-motion: reduce)").matches)document.documentElement.classList.add("motion")}catch(e){}`;
+const motionScript = `try{for(var n=document.head.firstChild;n;){var x=n.nextSibling;if(n.nodeType===8||n.nodeType===3)n.remove();n=x}}catch(e){}try{if(!matchMedia("(prefers-reduced-motion: reduce)").matches){document.documentElement.classList.add("motion");var v=performance.getEntriesByType("navigation")[0];if(location.pathname==="/"&&!(v&&v.type==="back_forward"))document.documentElement.classList.add("hero-playing")}}catch(e){}`;
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -99,6 +100,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className="min-h-full flex flex-col">
         {children}
         <Motion />
+        <MailtoFallback />
       </body>
     </html>
   );
