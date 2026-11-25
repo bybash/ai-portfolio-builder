@@ -6,7 +6,7 @@ import { ImageResponse } from "next/og";
 import { siteUrl } from "@/lib/config";
 import { pixelLogoDataUri } from "@/lib/pixel-logo";
 import { coverDataUri } from "@/lib/post-cover-data";
-import { COLS, coverPixels, ROWS } from "@/lib/post-pixels";
+import { COVER_COLS, coverPalette, coverPixels, COVER_ROWS } from "@/lib/post-pixels";
 import { publishedPost } from "@/lib/posts";
 import { getSite } from "@/lib/site-settings";
 
@@ -30,21 +30,21 @@ export default async function Image({ params }: { params: Promise<{ slug: string
     font("Inter-Regular.ttf"),
     coverDataUri(post.coverImageUrl),
   ]);
-  const palette = [t.accents[0], t.primary, t.accents[1], t.accents[2], t.accents[3]];
+  const palette = coverPalette(t);
   // The panel is taller than the pattern's shape, so it shows the slice with
   // whichever bottom corner is denser.
   const all = coverPixels(post.slug);
-  const cell = size.height / ROWS;
+  const cell = size.height / COVER_ROWS;
   const shown = Math.ceil(COVER_WIDTH / cell);
   const left = all.filter((p) => p.x < shown).length;
-  const right = all.filter((p) => p.x >= COLS - shown).length;
-  const offset = right > left ? COLS - shown : 0;
+  const right = all.filter((p) => p.x >= COVER_COLS - shown).length;
+  const offset = right > left ? COVER_COLS - shown : 0;
   const rects = all
     .filter((p) => p.x >= offset && p.x < offset + shown)
     .map((p) => `<rect x="${p.x - offset}" y="${p.y}" width="1" height="1" fill="${palette[p.color]}" opacity="${p.opacity}"/>`)
     .join("");
   const pattern = `data:image/svg+xml;base64,${Buffer.from(
-    `<svg xmlns="http://www.w3.org/2000/svg" width="${COVER_WIDTH}" height="${size.height}" viewBox="0 0 ${COVER_WIDTH / cell} ${ROWS}" shape-rendering="crispEdges">${rects}</svg>`,
+    `<svg xmlns="http://www.w3.org/2000/svg" width="${COVER_WIDTH}" height="${size.height}" viewBox="0 0 ${COVER_WIDTH / cell} ${COVER_ROWS}" shape-rendering="crispEdges">${rects}</svg>`,
   ).toString("base64")}`;
   const length = post.title.length;
 

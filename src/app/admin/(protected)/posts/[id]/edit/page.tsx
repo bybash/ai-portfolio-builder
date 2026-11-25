@@ -18,9 +18,13 @@ export default async function EditPostPage({ params }: { params: Promise<{ id: s
       aiReady={aiConfigured()} coversReady={imagesConfigured()}
       siteUrl={siteUrl}
       post={{
-        id: post.id,
-        status: post.status,
-        slugLocked: post.publishedAt !== null,
+        stored: {
+          id: post.id,
+          status: post.status,
+          slugLocked: post.publishedAt !== null,
+          slug: post.slug,
+          version: post.updatedAt.toISOString(),
+        },
         input: {
           title: post.title,
           slug: post.slug,

@@ -29,7 +29,7 @@ async function prepare(file: File): Promise<Blob> {
 }
 
 /** Uploads an image from the computer and returns its path on this site. */
-export async function uploadImage(file: File): Promise<string> {
+export async function uploadImage(file: File, signal?: AbortSignal): Promise<string> {
   let blob: Blob;
   try {
     blob = await prepare(file);
@@ -37,7 +37,7 @@ export async function uploadImage(file: File): Promise<string> {
     throw new Error("This file can't be read as an image. Use a JPEG, PNG, GIF or WebP.");
   }
   if (blob.size > MAX_MEDIA_BYTES) throw new Error("The image is over 4 MB.");
-  const response = await fetch("/api/admin/media", { method: "POST", body: blob });
+  const response = await fetch("/api/admin/media", { method: "POST", body: blob, signal });
   const result = (await response.json().catch(() => ({}))) as { url?: string; error?: string };
   if (!response.ok || !result.url) throw new Error(result.error ?? "The upload failed. Try again.");
   return result.url;

@@ -1,10 +1,10 @@
-import { COLS, coverPixels, ROWS } from "@/lib/post-pixels";
+import { COVER_COLS, coverPalette, coverPixels, COVER_ROWS } from "@/lib/post-pixels";
 import { cn } from "@/lib/utils";
 
 // A post's cover. Without an image it draws pixels in the theme's accents, like
 // the logo: always the same pattern for the same seed (the slug).
 
-const COLORS = ["var(--accent-1)", "var(--primary)", "var(--accent-2)", "var(--accent-3)", "var(--accent-4)"];
+const COLORS = coverPalette({ primary: "var(--primary)", accents: [1, 2, 3, 4].map((n) => `var(--accent-${n})`) });
 
 export function PostCover({ src, seed, className }: { src: string | null; seed: string; className?: string }) {
   if (src) {
@@ -14,7 +14,7 @@ export function PostCover({ src, seed, className }: { src: string | null; seed: 
   return (
     <svg
       aria-hidden="true"
-      viewBox={`0 0 ${COLS} ${ROWS}`}
+      viewBox={`0 0 ${COVER_COLS} ${COVER_ROWS}`}
       preserveAspectRatio="xMidYMid slice"
       shapeRendering="crispEdges"
       className={cn("h-full w-full bg-muted", className)}

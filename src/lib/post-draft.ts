@@ -4,7 +4,7 @@ import { blocksToMarkdown, roleDates } from "@/lib/agent-text";
 import { chatJson } from "@/lib/ai-client";
 import { siteConfig } from "@/lib/config";
 import { COVER_IDEA_RULES } from "@/lib/post-cover-ai";
-import { slugify } from "@/lib/post-schema";
+import { slugify, SUMMARY_MAX } from "@/lib/post-schema";
 import { prisma } from "@/lib/prisma";
 
 const draftSchema = z.object({
@@ -45,5 +45,5 @@ Respond with JSON: {"title": string, "summary": string (one sentence, under 200 
   const draft = draftSchema.parse(
     await chatJson({ system, user: `TOPIC:\n${topic}\n\nNOTES:\n${notes || "(none)"}\n\nCONTEXT:\n${context}` }),
   );
-  return { ...draft, summary: draft.summary.slice(0, 300), tags: draft.tags.slice(0, 5), slug: slugify(draft.title) };
+  return { ...draft, summary: draft.summary.slice(0, SUMMARY_MAX), tags: draft.tags.slice(0, 5), slug: slugify(draft.title) };
 }

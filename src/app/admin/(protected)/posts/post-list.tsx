@@ -8,6 +8,7 @@ import { PostStatusPill } from "@/components/admin/post-status";
 import { PostCover } from "@/components/post-cover";
 import { SocialIcon } from "@/components/social-icon";
 import { Button } from "@/components/ui/button";
+import type { PostStatus } from "@/lib/post-schema";
 
 import { deletePost } from "./actions";
 
@@ -16,7 +17,7 @@ type Row = {
   title: string;
   slug: string;
   summary: string;
-  status: "draft" | "published";
+  status: PostStatus;
   coverImageUrl: string | null;
   linkedinUrl: string | null;
   date: string;

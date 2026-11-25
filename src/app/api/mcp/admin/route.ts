@@ -10,7 +10,8 @@ import { adminMcpAuthorized, adminMcpEnabled } from "@/lib/admin-mcp-auth";
 import { imagesConfigured } from "@/lib/ai-env";
 import { siteConfig, siteUrl } from "@/lib/config";
 import { generateCoverImage } from "@/lib/post-cover-ai";
-import { postSchema, slugify } from "@/lib/post-schema";
+import { postSchema } from "@/lib/post-schema";
+import { createDraft } from "@/lib/post-write";
 import { prisma } from "@/lib/prisma";
 import { clientIp, featureOff, rateLimit, tooManyRequests } from "@/lib/rate-limit";
 
@@ -84,8 +85,7 @@ const handler = createMcpHandler(
       },
       async ({ title, summary, body, tags, slug }) => {
         try {
-          const data = postSchema.parse({ title, summary, body, tags: tags ?? [], slug: slug || slugify(title), coverImageUrl: "", linkedinUrl: "" });
-          const post = await prisma.post.create({ data: { ...data, coverImageUrl: null, linkedinUrl: null, status: "draft" } });
+          const post = await createDraft(prisma, { title, summary, body, tags, slug });
           return ok({ id: post.id, status: post.status, editUrl: editUrl(post.id) });
         } catch (e) {
           return problem(e);

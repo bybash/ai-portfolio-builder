@@ -6,7 +6,8 @@ import { PostCover } from "@/components/post-cover";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { siteConfig } from "@/lib/config";
-import { postDate, publishedPosts, readingMinutes } from "@/lib/posts";
+import { publishedPosts } from "@/lib/posts";
+import { postDate, readingMinutes } from "@/lib/post-text";
 import { getFeatures } from "@/lib/site-settings";
 
 // Rendered per request, so `next build` never needs a database.

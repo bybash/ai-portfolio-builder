@@ -2,6 +2,8 @@ import { randomUUID } from "crypto";
 
 import { Prisma, type PrismaClient } from "@/generated/prisma/client";
 import { parseBlockData, type BlockType } from "@/lib/blocks";
+import { blogEnabled } from "@/lib/blog-flag";
+import { findPublishedPosts } from "@/lib/post-query";
 import { embeddingsConfigured, embedTexts, NO_EMBEDDINGS_MESSAGE } from "@/lib/ai-client";
 
 // Keeps the chat's pgvector index in step with the content. Called after every
@@ -41,7 +43,7 @@ function textFromBlock(type: string, data: unknown): string | null {
   return parsed.text;
 }
 
-async function collectChunks(prisma: PrismaClient): Promise<PendingChunk[]> {
+async function collectChunks(prisma: Prisma.TransactionClient): Promise<PendingChunk[]> {
   const [projects, experiences, faqs] = await Promise.all([
     prisma.project.findMany({ include: { blocks: { orderBy: { order: "asc" } }, tags: true } }),
     prisma.experience.findMany({ include: { blocks: { orderBy: { order: "asc" } } } }),
@@ -79,8 +81,8 @@ async function collectChunks(prisma: PrismaClient): Promise<PendingChunk[]> {
     chunks.push({ sourceType: "faq", sourceId: faq.id, content: `Q: ${faq.question}\nA: ${faq.answer}` });
   }
 
-  // Published posts only. Paragraph by paragraph, like project content.
-  const posts = await prisma.post.findMany({ where: { status: "published" } });
+  // Published posts only, and none while the blog is off. Paragraph by paragraph, like project content.
+  const posts = await findPublishedPosts(prisma, await blogEnabled(prisma));
   for (const post of posts) {
     chunks.push({ sourceType: "post", sourceId: post.id, content: `Blog post: ${post.title}. ${post.summary}` });
     for (const text of post.body.replace(/^(`{3,}|~{3,})[\s\S]*?^\1/gm, "").split(/\n\s*\n/)) {
@@ -102,6 +104,9 @@ const keyOf = (c: { sourceType: string; sourceId: string | null; content: string
 const EMBED_BATCH = 100;
 // Rows per INSERT statement when writing the new index.
 const INSERT_BATCH = 100;
+// Any fixed number: the Postgres advisory lock that syncs share.
+const SYNC_LOCK = 726173;
+const MAX_ATTEMPTS = 3;
 
 export async function syncRagIndex(
   prisma: PrismaClient,
@@ -114,6 +119,15 @@ export async function syncRagIndex(
     log(`Search index not updated: ${NO_EMBEDDINGS_MESSAGE}`);
     return { total: 0, embedded: 0, reused: 0, removed: 0, written: false };
   }
+  for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {
+    const result = await trySync(prisma, opts.full ?? false, log);
+    if (result) return result;
+  }
+  throw new Error("The content kept changing while the search index was updated. Run the sync again.");
+}
+
+// One attempt; null when the content changed meanwhile.
+async function trySync(prisma: PrismaClient, full: boolean, log: (line: string) => void): Promise<RagSyncResult | null> {
   const pending = await collectChunks(prisma);
 
   // What is stored now: each chunk's identity, and each text's vector (pgvector prints
@@ -122,11 +136,11 @@ export async function syncRagIndex(
     SELECT "sourceType", "sourceId", content, embedding::text AS v FROM "Chunk" WHERE embedding IS NOT NULL
   `;
   const vectorByText = new Map<string, string>();
-  if (!opts.full) for (const s of stored) vectorByText.set(s.content, s.v);
+  if (!full) for (const s of stored) vectorByText.set(s.content, s.v);
 
   const before = stored.map(keyOf).sort();
   const after = pending.map(keyOf).sort();
-  const same = !opts.full && before.length === after.length && before.every((k, i) => k === after[i]);
+  const same = !full && before.length === after.length && before.every((k, i) => k === after[i]);
   if (same) {
     log(`RAG index up to date (${pending.length} chunks), nothing written.`);
     return { total: pending.length, embedded: 0, reused: pending.length, removed: 0, written: false };
@@ -142,8 +156,13 @@ export async function syncRagIndex(
     log(`  embedded ${Math.min(i + EMBED_BATCH, missing.length)}/${missing.length}`);
   }
 
-  await prisma.$transaction(
+  const swapped = await prisma.$transaction(
     async (tx) => {
+      // One sync writes at a time, and only if the content is still what was
+      // collected above, so an older run never puts removed content back.
+      await tx.$executeRaw`SELECT pg_advisory_xact_lock(${SYNC_LOCK})`;
+      const now = (await collectChunks(tx)).map(keyOf).sort();
+      if (now.length !== after.length || now.some((k, i) => k !== after[i])) return false;
       await tx.$executeRaw`DELETE FROM "Chunk"`;
       for (let i = 0; i < pending.length; i += INSERT_BATCH) {
         const values = pending.slice(i, i + INSERT_BATCH).map(
@@ -154,9 +173,11 @@ export async function syncRagIndex(
           VALUES ${Prisma.join(values)}
         `;
       }
+      return true;
     },
-    { timeout: 60_000 },
+    { timeout: 60_000, maxWait: 60_000 },
   );
+  if (!swapped) return null;
 
   const afterSet = new Set(after);
   const result = {

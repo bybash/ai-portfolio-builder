@@ -6,6 +6,7 @@ import { uploadImage } from "@/components/admin/upload-image";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { isUrlOrPath } from "@/lib/post-schema";
 import { youtubeId } from "@/lib/youtube";
 
 export type MediaRequest = { kind: "image"; file?: File } | { kind: "video" };
@@ -27,10 +28,17 @@ export function MediaDialog({
   const [alt, setAlt] = useState("");
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
+  const upload = useRef<AbortController | null>(null);
 
   useEffect(() => {
     if (!dialog.current?.open) dialog.current?.showModal();
   }, []);
+
+  // Cancelled (button or Esc): stop the upload, and insert nothing.
+  function cancel() {
+    upload.current?.abort();
+    onClose();
+  }
 
   async function insert() {
     setError("");
@@ -39,13 +47,17 @@ export function MediaDialog({
       if (!youtubeId(url)) return setError("That is not a YouTube video address.");
       return onInsert({ kind: "video", url });
     }
-    if (!file && !/^(https:\/\/\S+|\/(?!\/)\S+)$/.test(url)) {
+    if (!file && !isUrlOrPath(url)) {
       return setError("Choose a file, or use an https:// address or a /path on this site.");
     }
+    const controller = new AbortController();
+    upload.current = controller;
     setBusy(true);
     try {
-      onInsert({ kind: "image", src: file ? await uploadImage(file) : url, alt: alt.trim() });
+      const src = file ? await uploadImage(file, controller.signal) : url;
+      if (!controller.signal.aborted) onInsert({ kind: "image", src, alt: alt.trim() });
     } catch (e) {
+      if (controller.signal.aborted) return;
       setError(e instanceof Error ? e.message : "The upload failed.");
       setBusy(false);
     }
@@ -54,7 +66,7 @@ export function MediaDialog({
   return (
     <dialog
       ref={dialog}
-      onClose={onClose}
+      onClose={cancel}
       aria-labelledby="media-dialog-title"
       className="m-auto w-[min(28rem,calc(100vw-2rem))] rounded-lg border border-border bg-card p-6 text-foreground backdrop:bg-black/40"
     >

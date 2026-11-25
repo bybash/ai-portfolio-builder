@@ -8,7 +8,8 @@ import { SocialIcon } from "@/components/social-icon";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { siteConfig, siteUrl } from "@/lib/config";
-import { postDate, publishedPost, readingMinutes } from "@/lib/posts";
+import { publishedPost } from "@/lib/posts";
+import { postDate, readingMinutes } from "@/lib/post-text";
 
 export const dynamic = "force-dynamic";
 

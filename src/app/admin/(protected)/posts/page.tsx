@@ -2,7 +2,7 @@ import { Plus } from "lucide-react";
 import Link from "next/link";
 
 import { Button } from "@/components/ui/button";
-import { postDate, readingMinutes } from "@/lib/posts";
+import { postDate, readingMinutes } from "@/lib/post-text";
 import { prisma } from "@/lib/prisma";
 import { getFeatures } from "@/lib/site-settings";
 

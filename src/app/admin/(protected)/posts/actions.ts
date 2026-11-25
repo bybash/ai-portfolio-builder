@@ -3,43 +3,64 @@
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 
-import { Prisma } from "@/generated/prisma/client";
+import { Prisma, type Post } from "@/generated/prisma/client";
 import { aiConfigured } from "@/lib/ai-client";
 import { requireAdmin } from "@/lib/auth";
-import { purgeCdn } from "@/lib/cdn";
 import { imagesConfigured } from "@/lib/ai-env";
+import { purgeCdn } from "@/lib/cdn";
 import { draftPost } from "@/lib/post-draft";
 import { generateCoverImage } from "@/lib/post-cover-ai";
-import { postSchema, TODO_PATTERN, type PostInput } from "@/lib/post-schema";
+import { postSchema, TODO_PATTERN, type CoverRequest, type PostInput, type PostStatus } from "@/lib/post-schema";
 import { prisma } from "@/lib/prisma";
 import { syncRagIndexAfterResponse } from "@/lib/rag-sync-after";
 
+type StoredPost = { id: string; status: PostStatus; slugLocked: boolean; slug: string; version: string };
+
 export type SaveResult =
-  | { ok: true; id: string; status: "draft" | "published" }
-  | { ok: false; error: string };
+  | { ok: true; post: StoredPost }
+  // `conflict` is the stored version, when it is not the one the editor opened.
+  | { ok: false; error: string; conflict?: string };
 
 // "save" keeps the current status.
 const intentSchema = z.enum(["save", "publish", "unpublish"]);
+export type SaveIntent = z.infer<typeof intentSchema>;
 
-async function refreshPosts(slug: string) {
+const targetSchema = z.object({ id: z.string(), version: z.iso.datetime() }).nullable();
+
+// No revalidatePath here: every page that shows posts renders per request, and
+// a refresh of the open editor would replace what is being typed.
+async function afterChange(post: Pick<Post, "id" | "status">) {
+  // Out of the chat at once, even if the index update below fails.
+  if (post.status !== "published") await prisma.chunk.deleteMany({ where: { sourceType: "post", sourceId: post.id } });
   syncRagIndexAfterResponse();
-  revalidatePath("/admin/posts");
-  revalidatePath("/blog");
-  revalidatePath(`/blog/${slug}`);
   await purgeCdn();
 }
 
-export async function savePost(id: string | null, raw: PostInput, rawIntent: z.infer<typeof intentSchema>): Promise<SaveResult> {
+const toStored = (post: Post): StoredPost => ({
+  id: post.id,
+  status: post.status,
+  slugLocked: post.publishedAt !== null,
+  slug: post.slug,
+  version: post.updatedAt.toISOString(),
+});
+
+const CONFLICT = "This post was changed somewhere else. Yours is not saved.";
+
+export async function savePost(rawTarget: { id: string; version: string } | null, raw: PostInput, rawIntent: SaveIntent): Promise<SaveResult> {
   await requireAdmin();
   const parsed = postSchema.safeParse(raw);
   const intent = intentSchema.safeParse(rawIntent);
+  const target = targetSchema.safeParse(rawTarget);
   if (!parsed.success) return { ok: false, error: parsed.error.issues[0].message };
-  if (!intent.success) return { ok: false, error: "Invalid action." };
+  if (!intent.success || !target.success) return { ok: false, error: "Invalid action." };
 
-  const existing = id ? await prisma.post.findUnique({ where: { id } }) : null;
-  if (id && !existing) return { ok: false, error: "This post no longer exists." };
+  const existing = target.data ? await prisma.post.findUnique({ where: { id: target.data.id } }) : null;
+  if (target.data && !existing) return { ok: false, error: "This post no longer exists." };
+  if (existing && existing.updatedAt.toISOString() !== target.data!.version) {
+    return { ok: false, error: CONFLICT, conflict: existing.updatedAt.toISOString() };
+  }
 
-  const status =
+  const status: PostStatus =
     intent.data === "publish" ? "published" : intent.data === "unpublish" ? "draft" : (existing?.status ?? "draft");
   const input = parsed.data;
   if (status === "published" && [input.title, input.summary, input.body].some((t) => TODO_PATTERN.test(t))) {
@@ -56,13 +77,22 @@ export async function savePost(id: string | null, raw: PostInput, rawIntent: z.i
     linkedinUrl: input.linkedinUrl || null,
     status,
     publishedAt: existing?.publishedAt ?? (status === "published" ? new Date() : null),
-  } as const;
+  };
   try {
-    const post = existing
-      ? await prisma.post.update({ where: { id: existing.id }, data })
-      : await prisma.post.create({ data });
-    await refreshPosts(post.slug);
-    return { ok: true, id: post.id, status: post.status };
+    let post: Post;
+    if (existing) {
+      // Only if it is still the version read above.
+      const [changed] = await prisma.post.updateManyAndReturn({ where: { id: existing.id, updatedAt: existing.updatedAt }, data });
+      if (!changed) {
+        const now = await prisma.post.findUnique({ where: { id: existing.id }, select: { updatedAt: true } });
+        return { ok: false, error: CONFLICT, conflict: now?.updatedAt.toISOString() };
+      }
+      post = changed;
+    } else {
+      post = await prisma.post.create({ data });
+    }
+    await afterChange(post);
+    return { ok: true, post: toStored(post) };
   } catch (e) {
     if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === "P2002") {
       return { ok: false, error: "That slug is already in use." };
@@ -74,9 +104,12 @@ export async function savePost(id: string | null, raw: PostInput, rawIntent: z.i
 
 export async function deletePost(id: string) {
   await requireAdmin();
-  const post = await prisma.post.delete({ where: { id } });
-  await refreshPosts(post.slug);
+  await prisma.post.delete({ where: { id } });
+  await afterChange({ id, status: "draft" });
+  revalidatePath("/admin/posts");
 }
+
+export type GeneratedDraft = Awaited<ReturnType<typeof draftPost>>;
 
 const draftRequestSchema = z.object({ topic: z.string().trim().min(3).max(300), notes: z.string().trim().max(12_000) });
 
@@ -99,7 +132,7 @@ const coverRequestSchema = z.object({
   idea: z.string().trim().max(1000),
 });
 
-export async function generateCover(raw: z.infer<typeof coverRequestSchema>) {
+export async function generateCover(raw: CoverRequest) {
   await requireAdmin();
   if (!imagesConfigured()) return { ok: false as const, error: "AI covers need an OpenRouter key." };
   const parsed = coverRequestSchema.safeParse(raw);

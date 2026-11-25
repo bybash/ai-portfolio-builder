@@ -25,12 +25,21 @@ const nextConfig: NextConfig = {
   async headers() {
     return [
       {
-        source: "/((?!admin|api|ingest|media|_next).*)",
+        source: "/((?!admin|api|ingest|media|_next|blog|llms|sitemap).*)",
         headers: [
           { key: "Vercel-CDN-Cache-Control", value: "public, s-maxage=300, stale-while-revalidate=604800" },
           { key: "Netlify-CDN-Cache-Control", value: "public, s-maxage=300, stale-while-revalidate=604800, durable" },
         ],
       },
+      // Anything that lists posts is kept for a minute and never served stale
+      // after that, so an unpublished post is gone soon on every host.
+      ...["/blog/:path*", "/llms.txt", "/llms-full.txt", "/sitemap.xml"].map((source) => ({
+        source,
+        headers: [
+          { key: "Vercel-CDN-Cache-Control", value: "public, s-maxage=60" },
+          { key: "Netlify-CDN-Cache-Control", value: "public, s-maxage=60" },
+        ],
+      })),
     ];
   },
   // PostHog's API paths end in a slash; don't redirect them.

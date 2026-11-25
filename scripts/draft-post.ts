@@ -11,19 +11,15 @@ import { readFileSync } from "fs";
 
 import { PrismaClient } from "../src/generated/prisma/client";
 import { createDbAdapter } from "../src/lib/db-adapter";
-import { postSchema, slugify } from "../src/lib/post-schema";
+import { createDraft } from "../src/lib/post-write";
 
 async function main() {
   const file = process.argv[2];
   const match = file && readFileSync(file, "utf-8").replace(/\r\n/g, "\n").match(/^# (.+)\n+([^\n]+(?:\n[^\n]+)*)\n\s*\n([\s\S]+)$/);
   if (!match) throw new Error('Usage: npm run post:draft -- post.md ("# Title", a summary paragraph, then the body)');
-  const data = postSchema.parse({
-    title: match[1], slug: slugify(match[1]), summary: match[2].replace(/\n/g, " "), body: match[3],
-    coverImageUrl: "", tags: [], linkedinUrl: "",
-  });
   const prisma = new PrismaClient({ adapter: createDbAdapter() });
   try {
-    const post = await prisma.post.create({ data: { ...data, coverImageUrl: null, linkedinUrl: null } });
+    const post = await createDraft(prisma, { title: match[1], summary: match[2].replace(/\n/g, " "), body: match[3] });
     console.log(`Draft saved: /admin/posts/${post.id}/edit`);
   } finally {
     await prisma.$disconnect();

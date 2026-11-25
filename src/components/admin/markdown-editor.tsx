@@ -18,6 +18,7 @@ import type { Ctx } from "@milkdown/kit/ctx";
 import type { EditorView } from "@milkdown/kit/prose/view";
 import { useEffect, useImperativeHandle, useRef, useState, type Ref } from "react";
 
+import { cleanMarkdown } from "@/lib/clean-markdown";
 import { MediaDialog, type MediaRequest, type MediaResult } from "@/components/admin/media-dialog";
 
 export type MarkdownEditorHandle = { getMarkdown: () => string | undefined };
@@ -29,9 +30,6 @@ const VIDEO_ICON =
   '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="fill:none"><rect x="3" y="5" width="18" height="14" rx="3"/><path d="m10 9 5 3-5 3z"/></svg>';
 
 const imageFiles = (data: DataTransfer | null) => [...(data?.files ?? [])].filter((f) => f.type.startsWith("image/"));
-
-// Milkdown writes blank lines as <br />, which the site would show as text.
-const clean = (markdown: string) => markdown.replace(/^<br \/>\n?/gm, "").replace(/\n{3,}/g, "\n\n").trim();
 
 // A WYSIWYG editor (Milkdown Crepe) that reads and writes Markdown. It owns the
 // text after mounting: change its `key` to load new text.
@@ -47,6 +45,9 @@ export function MarkdownEditor({
   const host = useRef<HTMLDivElement>(null);
   const instance = useRef<Crepe | null>(null);
   const initial = useRef(initialValue);
+  // The same text as Milkdown writes it. While nothing was edited, the text is
+  // handed back exactly as it came in.
+  const baseline = useRef<string | null>(null);
   const latestOnChange = useRef(onChange);
   const view = useRef<EditorView | null>(null);
   const [failed, setFailed] = useState(false);
@@ -59,7 +60,9 @@ export function MarkdownEditor({
   }
   const askRef = useRef(ask);
 
-  function insertMedia(result: MediaResult) {
+  const close = (id: number) => setQueue((q) => q.filter((item) => item.id !== id));
+
+  function insertMedia(id: number, result: MediaResult) {
     const editor = view.current;
     if (editor) {
       const { schema, tr } = editor.state;
@@ -71,16 +74,22 @@ export function MarkdownEditor({
       const node = schema.nodes.paragraph.create(null, content);
       editor.dispatch(tr.replaceSelectionWith(node, false).scrollIntoView());
     }
-    setQueue((q) => q.slice(1));
+    close(id);
   }
 
   useEffect(() => {
     latestOnChange.current = onChange;
   });
 
+  function fromEditor(raw: string) {
+    const text = cleanMarkdown(raw);
+    return text === baseline.current ? initial.current : text;
+  }
+  const fromEditorRef = useRef(fromEditor);
+
   useImperativeHandle(ref, () => ({
     // Undefined until it has loaded, so the caller keeps the text it has.
-    getMarkdown: () => (instance.current ? clean(instance.current.getMarkdown()) : undefined),
+    getMarkdown: () => (instance.current ? fromEditor(instance.current.getMarkdown()) : undefined),
   }));
 
   useEffect(() => {
@@ -166,13 +175,14 @@ export function MarkdownEditor({
       });
       crepe.on((listener) => {
         listener.markdownUpdated((_ctx, markdown, previous) => {
-          if (!cancelled && markdown !== previous) latestOnChange.current(clean(markdown));
+          if (!cancelled && markdown !== previous) latestOnChange.current(fromEditorRef.current(markdown));
         });
       });
       crepe.editor.use(youtubePreview);
       await crepe.create();
       if (cancelled) await crepe.destroy();
       else {
+        baseline.current = cleanMarkdown(crepe.getMarkdown());
         instance.current = crepe;
         view.current = crepe.editor.ctx.get(editorViewCtx);
       }
@@ -193,10 +203,10 @@ export function MarkdownEditor({
 
   return (
     <div className="post-editor">
-      {failed && <p className="p-4 text-sm text-destructive">The editor did not load. Use “Edit as Markdown” above.</p>}
+      {failed && <p className="p-4 text-sm text-destructive">The editor did not load. Use “Edit as Markdown” below.</p>}
       <div ref={host} />
       {queue[0] && (
-        <MediaDialog key={queue[0].id} request={queue[0].request} onInsert={insertMedia} onClose={() => setQueue((q) => q.slice(1))} />
+        <MediaDialog key={queue[0].id} request={queue[0].request} onInsert={(result) => insertMedia(queue[0].id, result)} onClose={() => close(queue[0].id)} />
       )}
     </div>
   );

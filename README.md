@@ -84,7 +84,8 @@ Off until you switch it on (`blog` in [Feature flags](#feature-flags)), so you c
 * **Images** from your computer, pasted or dropped in. They are resized and stored in your database, so there is no file storage to set up. A post without a cover gets a pixel pattern in your theme's colours.
 * **For readers:** `/blog`, post pages, RSS, a share image per post, canonical links and `BlogPosting` data. Published posts also go into the sitemap, `llms.txt` and the chat's knowledge.
 * **LinkedIn:** copy the article formatted for LinkedIn's editor, with its images one by one. Save the article's link and the post ends with a "Comment on LinkedIn" box. (LinkedIn has no API for publishing articles, so this part is copy and paste.)
-* **AI drafts and covers** (optional): a draft from your own notes and your site's content, which marks what it doesn't know as `[TODO]`; a post with a `[TODO]` can't be published. Covers work with OpenRouter. Both spend your provider's credit, only when you click.
+* **AI drafts and covers** (optional): a draft from your own notes and your site's content, which marks what it doesn't know as `[TODO]`; a post with a `[TODO]` can't be published. Covers work with OpenRouter. Both spend your provider's credit, only when you click. They can take a minute: on Netlify, which stops a function sooner than Vercel, a slow one may be cut off after the provider has charged for it. A cover on another site is shown on the blog, but the share image then uses the pixel pattern.
+* **From a file:** `npm run post:draft -- post.md` saves a Markdown file as a draft.
 * **From Claude Code** (optional): a private MCP server that writes drafts. It has no tool to publish, so a person always reads the post first. See [Write posts from Claude Code](#write-posts-from-claude-code).
 
 <table>
@@ -96,12 +97,12 @@ Off until you switch it on (`blog` in [Feature flags](#feature-flags)), so you c
 
 ### And also
 
-* **Pixel buttons** that match the logo, and a full-screen hero on desktop with a scroll hint. While the hero plays, the header shows only the logo.
+* **Pixel buttons** that match the logo, and a full-screen hero on desktop with a scroll hint, readable streaming and a photo that starts blurred. While the hero plays, the header shows only the logo.
 * **Email links that always do something.** When no mail app opens, the address is copied and a note says so.
 * **Project banners.** A project with `logo.svg` or `logo.png` (and an optional `logo-dark` variant) in `public/projects/<slug>/` opens with its logo on a soft gradient; others open with a cropped cover.
 * **A session block.** Beside the logo, terminal-style lines: name and version, the role, and a working directory that follows the page (`~/odile/projects`).
 * **For AI agents.** `/llms.txt` (a map of the site), `/llms-full.txt` (every page as one Markdown file) and `/agents.md` (how to use and cite them), ProfilePage structured data, `robots.txt` and `sitemap.xml`.
-* **Vercel and Netlify.** 5-minute CDN caching for public pages on both. For Netlify, also a `netlify.toml`, a purge on every admin save, and a fix for the HTML comment Netlify adds to `<head>`.
+* **Vercel and Netlify.** 5-minute CDN caching for public pages on both, one minute for anything that lists posts. For Netlify, also a `netlify.toml`, a purge on every admin save, and a fix for the HTML comment Netlify adds to `<head>`.
 * **PostHog analytics**, off until `NEXT_PUBLIC_POSTHOG_KEY` is set, proxied through the site, with `/admin` never tracked.
 * **Accessibility:** a `<main>` landmark on every page, and reduced motion respected everywhere.
 

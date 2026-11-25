@@ -1,106 +1,104 @@
 "use client";
 
-import { ArrowLeft, ChevronDown, ExternalLink, ImagePlus, Sparkles, X } from "lucide-react";
+import { ArrowLeft, ExternalLink, ImagePlus, Sparkles, X } from "lucide-react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useEffect, useRef, useState, useTransition } from "react";
+import { useRef, useState, useTransition } from "react";
 
-import { generateCover, generateDraft, savePost } from "@/app/admin/(protected)/posts/actions";
+import { generateCover, generateDraft, savePost, type GeneratedDraft, type SaveIntent } from "@/app/admin/(protected)/posts/actions";
+import { CoverPanel } from "@/components/admin/cover-panel";
+import { DraftPanel, type DraftRequest } from "@/components/admin/draft-panel";
 import { LinkedInPanel } from "@/components/admin/linkedin-panel";
 import { MarkdownEditor, type MarkdownEditorHandle } from "@/components/admin/markdown-editor";
 import { MediaDialog } from "@/components/admin/media-dialog";
 import { PostStatusPill } from "@/components/admin/post-status";
+import { SidePanel } from "@/components/admin/side-panel";
 import { TagInput } from "@/components/admin/tag-input";
+import { useUnsavedGuard } from "@/components/admin/use-unsaved-guard";
 import { PostCover } from "@/components/post-cover";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { slugify, type PostInput } from "@/lib/post-schema";
+import { slugify, SUMMARY_MAX, type CoverRequest, type PostInput, type PostStatus } from "@/lib/post-schema";
+import { countWords, readingMinutes } from "@/lib/post-text";
+
+/** The post as it is stored: `version` is its last change, to notice edits made elsewhere. */
+type StoredPost = { id: string; status: PostStatus; slugLocked: boolean; slug: string; version: string };
 
 type Props = {
-  post: { id: string; status: "draft" | "published"; slugLocked: boolean; input: PostInput } | null;
+  post: { stored: StoredPost; input: PostInput } | null;
   aiReady: boolean;
   coversReady: boolean;
   siteUrl: string;
 };
 
 const EMPTY: PostInput = { title: "", slug: "", summary: "", body: "", coverImageUrl: "", tags: [], linkedinUrl: "" };
-const area = "w-full rounded-lg border border-border bg-card px-3 py-2 text-sm";
-const SUMMARY_MAX = 300;
-
-function SidePanel({ title, icon, open, children }: { title: string; icon?: React.ReactNode; open?: boolean; children: React.ReactNode }) {
-  return (
-    <details open={open} className="group rounded-xl border border-border bg-card">
-      <summary className="flex cursor-pointer list-none items-center gap-2 px-4 py-3 text-sm font-semibold [&::-webkit-details-marker]:hidden">
-        {icon}
-        {title}
-        <ChevronDown aria-hidden className="ml-auto size-4 text-muted-foreground transition-transform group-open:rotate-180" />
-      </summary>
-      <div className="flex flex-col gap-4 border-t border-border p-4">{children}</div>
-    </details>
-  );
-}
 
 export function PostEditor({ post, aiReady, coversReady, siteUrl }: Props) {
-  const router = useRouter();
+  const [stored, setStored] = useState<StoredPost | null>(post?.stored ?? null);
   const [input, setInput] = useState<PostInput>(post?.input ?? EMPTY);
+  // What was last saved; anything different is unsaved.
+  const [savedInput, setSavedInput] = useState<PostInput>(post?.input ?? EMPTY);
   const [slugTouched, setSlugTouched] = useState(Boolean(post));
-  const [dirty, setDirty] = useState(false);
   const [view, setView] = useState<"write" | "markdown">("write");
   const [message, setMessage] = useState<{ error: boolean; text: string } | null>(null);
-  const [topic, setTopic] = useState("");
-  const [notes, setNotes] = useState("");
   const [saving, startSaving] = useTransition();
   const [drafting, startDrafting] = useTransition();
   const [drawing, startDrawing] = useTransition();
-  const [withCover, setWithCover] = useState(false);
   // The scene to draw: suggested by the draft or the last cover, and editable.
   const [coverIdea, setCoverIdea] = useState("");
+  // An AI draft that arrived after the post was edited, waiting for a decision.
+  const [waitingDraft, setWaitingDraft] = useState<{ draft: GeneratedDraft; withCover: boolean } | null>(null);
   // Bumped to reload the editor when the text is replaced from outside it.
   const [editorKey, setEditorKey] = useState(0);
-  const editor = useRef<MarkdownEditorHandle>(null);
   const [coverOpen, setCoverOpen] = useState(false);
-  const status = post?.status ?? "draft";
+  const editor = useRef<MarkdownEditorHandle>(null);
+  const latest = useRef(input);
+
+  const status = stored?.status ?? "draft";
   const live = status === "published";
   const busy = saving || drafting || drawing;
-  const words = input.body.trim() ? input.body.trim().split(/\s+/).length : 0;
-
-  // A tab close or reload must not lose unsaved writing.
-  useEffect(() => {
-    if (!dirty) return;
-    const warn = (e: BeforeUnloadEvent) => e.preventDefault();
-    window.addEventListener("beforeunload", warn);
-    return () => window.removeEventListener("beforeunload", warn);
-  }, [dirty]);
+  const canDraw = !busy && input.title.trim() !== "";
+  const dirty = JSON.stringify(input) !== JSON.stringify(savedInput);
+  useUnsavedGuard(dirty);
 
   function set(patch: Partial<PostInput>) {
-    setInput((v) => ({ ...v, ...patch }));
-    setDirty(true);
+    latest.current = { ...latest.current, ...patch };
+    setInput(latest.current);
   }
 
   // The editor reports changes with a short delay; this is the text right now.
-  const currentBody = () => editor.current?.getMarkdown() ?? input.body;
+  const currentInput = (): PostInput => ({ ...latest.current, body: editor.current?.getMarkdown() ?? latest.current.body });
 
-  function save(intent: "save" | "publish" | "unpublish") {
+  function save(intent: SaveIntent) {
     if (busy) return;
     if (intent === "publish" && !confirm("Publish this post on the site?")) return;
     setMessage(null);
-    const body = currentBody();
     startSaving(async () => {
-      const result = await savePost(post?.id ?? null, { ...input, body }, intent);
+      const sent = currentInput();
+      const bodyBefore = latest.current.body;
+      let result = await savePost(stored && { id: stored.id, version: stored.version }, sent, intent);
+      if (!result.ok && result.conflict) {
+        const overwrite = confirm(
+          "This post was changed somewhere else since you opened it (another tab, or an agent).\n\nOK: save yours over it.\nCancel: keep yours here, unsaved.",
+        );
+        if (overwrite) result = await savePost(stored && { id: stored.id, version: result.conflict }, sent, intent);
+      }
       if (!result.ok) return setMessage({ error: true, text: result.error });
-      setInput((v) => ({ ...v, body }));
-      setDirty(false);
-      setMessage({ error: false, text: result.status === "published" ? "Saved. The post is live." : "Draft saved." });
-      if (post) router.refresh();
-      else router.replace(`/admin/posts/${result.id}/edit`);
+
+      // Typing may have gone on meanwhile: that stays, as unsaved.
+      setSavedInput(sent);
+      if (latest.current.body === bodyBefore) set({ body: sent.body });
+      setStored(result.post);
+      setMessage({ error: false, text: result.post.status === "published" ? "Saved. The post is live." : "Draft saved." });
+      // The first save gets its own address, without reloading the editor.
+      if (!stored) window.history.replaceState(null, "", `/admin/posts/${result.post.id}/edit`);
     });
   }
 
-  function drawCover(from: { title: string; summary: string; idea: string }, done = "") {
+  function drawCover(request: CoverRequest, done = "") {
     startDrawing(async () => {
       setMessage({ error: false, text: `${done}Drawing the cover…` });
-      const result = await generateCover(from);
+      const result = await generateCover(request);
       if (!result.ok) return setMessage({ error: true, text: `${done}${result.error}` });
       set({ coverImageUrl: result.url });
       setCoverIdea(result.idea);
@@ -109,19 +107,31 @@ export function PostEditor({ post, aiReady, coversReady, siteUrl }: Props) {
     });
   }
 
-  function draft() {
-    if (currentBody().trim() && !confirm("Replace the current text with a new AI draft?")) return;
+  const drawScene = (idea: string) => drawCover({ title: input.title, summary: input.summary, idea });
+
+  function applyDraft(draft: GeneratedDraft, withCover: boolean) {
+    const { slug, coverIdea: idea, ...text } = draft;
+    setWaitingDraft(null);
+    setCoverIdea(idea);
+    set(stored?.slugLocked ? text : { ...text, slug });
+    setEditorKey((k) => k + 1);
+    const done = "Draft ready. Check every fact, and resolve any [TODO] before publishing. ";
+    if (withCover) drawCover({ title: text.title, summary: text.summary, idea }, done);
+    else setMessage({ error: false, text: done });
+  }
+
+  function draft({ topic, notes, withCover }: DraftRequest) {
+    const before = currentInput();
+    const hasText = [before.title, before.summary, before.body].some((t) => t.trim()) || before.tags.length > 0;
+    if (hasText && !confirm("Replace the title, summary, tags, address and text with a new AI draft?")) return;
     setMessage(null);
+    setWaitingDraft(null);
     startDrafting(async () => {
       const result = await generateDraft(topic, notes);
       if (!result.ok) return setMessage({ error: true, text: result.error });
-      const { slug, coverIdea: idea, ...rest } = result.draft;
-      setCoverIdea(idea);
-      set(post?.slugLocked ? rest : { ...rest, slug });
-      setEditorKey((k) => k + 1);
-      const done = "Draft ready. Check every fact, and resolve any [TODO] before publishing. ";
-      if (withCover && coversReady) drawCover({ title: rest.title, summary: rest.summary, idea }, done);
-      else setMessage({ error: false, text: done });
+      if (JSON.stringify(currentInput()) === JSON.stringify(before)) return applyDraft(result.draft, withCover);
+      setWaitingDraft({ draft: result.draft, withCover });
+      setMessage({ error: false, text: "The AI draft is ready, but you edited the post meanwhile. Your text is untouched." });
     });
   }
 
@@ -141,13 +151,13 @@ export function PostEditor({ post, aiReady, coversReady, siteUrl }: Props) {
           </Link>
           <PostStatusPill status={status} />
           <span className="hidden font-mono text-xs text-muted-foreground sm:inline">
-            {words} words · {Math.max(1, Math.round(words / 220))} min
+            {countWords(input.body)} words · {readingMinutes(input.body)} min
           </span>
           <span className="text-xs text-muted-foreground">{saving ? "Saving…" : dirty ? "Unsaved changes" : ""}</span>
           <div className="ml-auto flex items-center gap-2">
             {live && (
               <>
-                <a href={`/blog/${post!.input.slug}`} target="_blank" aria-label="View on site" title="View on site" className="flex size-9 items-center justify-center rounded-lg text-muted-foreground hover:bg-muted hover:text-foreground">
+                <a href={`/blog/${stored!.slug}`} target="_blank" aria-label="View on site" title="View on site" className="flex size-9 items-center justify-center rounded-lg text-muted-foreground hover:bg-muted hover:text-foreground">
                   <ExternalLink className="size-4" />
                 </a>
                 <Button type="button" size="sm" disabled={busy} variant="neutral" onClick={() => save("unpublish")}>
@@ -168,6 +178,24 @@ export function PostEditor({ post, aiReady, coversReady, siteUrl }: Props) {
         <p aria-live="polite" className={`text-sm empty:hidden ${message?.error ? "pb-3 font-medium text-destructive" : "pb-3 text-muted-foreground"}`}>
           {message?.text}
         </p>
+        {waitingDraft && (
+          <div className="flex gap-2 pb-3">
+            <Button type="button" size="sm" disabled={busy} onClick={() => applyDraft(waitingDraft.draft, waitingDraft.withCover)}>
+              Replace with the draft
+            </Button>
+            <Button
+              type="button"
+              size="sm"
+              variant="neutral"
+              onClick={() => {
+                setWaitingDraft(null);
+                setMessage(null);
+              }}
+            >
+              Keep mine
+            </Button>
+          </div>
+        )}
       </div>
 
       <div className="grid items-start gap-8 lg:grid-cols-[minmax(0,1fr)_19rem]">
@@ -177,7 +205,7 @@ export function PostEditor({ post, aiReady, coversReady, siteUrl }: Props) {
               <PostCover src={input.coverImageUrl} seed={input.slug} />
               <div className="absolute top-3 right-3 flex gap-2">
                 {coversReady && (
-                  <Button type="button" size="sm" variant="neutral" disabled={busy || !input.title.trim()} onClick={() => drawCover({ title: input.title, summary: input.summary, idea: coverIdea })}>
+                  <Button type="button" size="sm" variant="neutral" disabled={!canDraw} onClick={() => drawScene(coverIdea)}>
                     <Sparkles /> {drawing ? "Drawing…" : "New with AI"}
                   </Button>
                 )}
@@ -197,9 +225,9 @@ export function PostEditor({ post, aiReady, coversReady, siteUrl }: Props) {
               {coversReady && (
                 <button
                   type="button"
-                  disabled={busy || !input.title.trim()}
+                  disabled={!canDraw}
                   title={input.title.trim() ? "Paid, usually a few cents" : "Add a title first"}
-                  onClick={() => drawCover({ title: input.title, summary: input.summary, idea: coverIdea })}
+                  onClick={() => drawScene(coverIdea)}
                   className="inline-flex items-center gap-2 rounded-lg py-1 text-sm text-muted-foreground hover:text-foreground disabled:opacity-50"
                 >
                   <Sparkles className="size-4" /> {drawing ? "Drawing…" : "Make one with AI"}
@@ -249,7 +277,7 @@ export function PostEditor({ post, aiReady, coversReady, siteUrl }: Props) {
                 className="font-mono text-xs text-muted-foreground hover:text-foreground"
                 onClick={() => {
                   if (view === "write") {
-                    setInput((v) => ({ ...v, body: currentBody() }));
+                    set({ body: currentInput().body });
                     setView("markdown");
                   } else setView("write");
                 }}
@@ -271,7 +299,7 @@ export function PostEditor({ post, aiReady, coversReady, siteUrl }: Props) {
               <Input
                 id="slug"
                 value={input.slug}
-                disabled={post?.slugLocked}
+                disabled={stored?.slugLocked}
                 className="font-mono text-xs"
                 onChange={(e) => {
                   setSlugTouched(true);
@@ -279,7 +307,7 @@ export function PostEditor({ post, aiReady, coversReady, siteUrl }: Props) {
                 }}
               />
               <p className="font-mono text-xs break-all text-muted-foreground">
-                {post?.slugLocked ? "Fixed once published" : `/blog/${input.slug || "…"}`}
+                {stored?.slugLocked ? "Fixed once published" : `/blog/${input.slug || "…"}`}
               </p>
             </div>
           </SidePanel>
@@ -299,57 +327,8 @@ export function PostEditor({ post, aiReady, coversReady, siteUrl }: Props) {
             </p>
           </SidePanel>
 
-          {coversReady && (
-            <SidePanel title="Cover with AI" icon={<ImagePlus aria-hidden className="size-4 text-link" />}>
-              <div className="flex flex-col gap-1.5">
-                <Label htmlFor="cover-idea">Scene</Label>
-                <textarea
-                  id="cover-idea"
-                  value={coverIdea}
-                  maxLength={1000}
-                  onChange={(e) => setCoverIdea(e.target.value)}
-                  placeholder="Describe the picture, or leave empty for a suggestion"
-                  className={`${area} min-h-28`}
-                />
-              </div>
-              <div className="flex flex-wrap gap-2">
-                <Button type="button" size="sm" disabled={busy || !input.title.trim()} onClick={() => drawCover({ title: input.title, summary: input.summary, idea: coverIdea })}>
-                  {drawing ? "Drawing…" : "Draw this"}
-                </Button>
-                <Button type="button" size="sm" variant="neutral" disabled={busy || !input.title.trim()} onClick={() => drawCover({ title: input.title, summary: input.summary, idea: "" })}>
-                  New scene
-                </Button>
-              </div>
-              <p className="text-xs text-muted-foreground">Paid, usually a few cents each time.</p>
-            </SidePanel>
-          )}
-
-          <SidePanel title="Draft with AI" icon={<Sparkles aria-hidden className="size-4 text-link" />} open={!post && aiReady}>
-            {aiReady ? (
-              <>
-                <div className="flex flex-col gap-1.5">
-                  <Label htmlFor="topic">Topic</Label>
-                  <Input id="topic" value={topic} onChange={(e) => setTopic(e.target.value)} />
-                </div>
-                <div className="flex flex-col gap-1.5">
-                  <Label htmlFor="notes">Your points and facts</Label>
-                  <textarea id="notes" value={notes} onChange={(e) => setNotes(e.target.value)} className={`${area} min-h-28`} />
-                </div>
-                {coversReady && (
-                  <label className="flex items-center gap-2 text-sm">
-                    <input type="checkbox" checked={withCover} onChange={(e) => setWithCover(e.target.checked)} className="size-4 accent-primary" />
-                    Also make a cover <span className="text-muted-foreground">(paid, a few cents)</span>
-                  </label>
-                )}
-                <Button type="button" size="sm" onClick={draft} disabled={busy || topic.trim().length < 3}>
-                  {drafting ? "Drafting…" : "Write a draft"}
-                </Button>
-              </>
-            ) : (
-              <p className="text-sm text-muted-foreground">Set AI_API_KEY to turn this on. Writing by hand works without it.</p>
-            )}
-          </SidePanel>
-
+          {coversReady && <CoverPanel idea={coverIdea} disabled={!canDraw} drawing={drawing} onIdea={setCoverIdea} onDraw={drawScene} />}
+          <DraftPanel open={!post && aiReady} aiReady={aiReady} coversReady={coversReady} busy={busy} drafting={drafting} onDraft={draft} />
         </aside>
       </div>
 

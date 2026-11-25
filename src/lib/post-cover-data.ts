@@ -1,13 +1,16 @@
 import { siteUrl } from "@/lib/config";
 import { MAX_MEDIA_BYTES, sniffImageType } from "@/lib/media";
-import { prisma } from "@/lib/prisma";
+import { readStoredImage } from "@/lib/media-store";
+import { readCapped } from "@/lib/read-capped";
 
+// Only images this site holds: an uploaded one, or a file in public/. The
+// server never fetches another host for a visitor, and the file extension
+// keeps a cover from pointing at a share image (which would fetch itself).
 async function coverBytes(url: string): Promise<Uint8Array | null> {
-  const media = url.match(/^\/media\/([\w-]+)\.\w+$/);
-  if (media) return (await prisma.media.findUnique({ where: { id: media[1] } }))?.data ?? null;
-  const response = await fetch(url.startsWith("/") ? `${siteUrl}${url}` : url, { signal: AbortSignal.timeout(4000) });
-  if (!response.ok || Number(response.headers.get("content-length") ?? 0) > MAX_MEDIA_BYTES) return null;
-  return new Uint8Array(await response.arrayBuffer());
+  if (url.startsWith("/media/")) return (await readStoredImage(url))?.data ?? null;
+  if (!/^\/(?!\/)[\w./-]+\.(jpe?g|png)$/i.test(url)) return null;
+  const response = await fetch(`${siteUrl}${url}`, { redirect: "error", signal: AbortSignal.timeout(4000) });
+  return response.ok ? readCapped(response.body, MAX_MEDIA_BYTES) : null;
 }
 
 /** A post's cover for its share image, or null to draw the pixel pattern instead. */
